@@ -1,6 +1,4 @@
-package co.edu.uniquindio.co.proyecto.
-
-final;
+package co.edu.uniquindio.co.proyecto.app;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -14,3 +12,5 @@ public class HelloController {
         welcomeText.setText("Welcome to JavaFX Application!");
     }
 }
+
+

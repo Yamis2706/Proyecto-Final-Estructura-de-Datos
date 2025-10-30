@@ -41,9 +41,11 @@ public class LoginController {
         ctx.grafoDeSimilitud.conectar(demo.get(2), demo.get(3), 1.0);
         ctx.grafoDeSimilitud.conectar(demo.get(0), demo.get(2), 3.0);
         // Usuario demo
-        Usuario u = new Usuario("demo","demo","Demo");
+        Usuario u = new Usuario("demo","demo","Demo", Usuario.Role.USER);
         u.agregarFavorito(demo.get(2));
         ctx.userRepository.add(u);
+        // Admin demo
+        ctx.userRepository.add(new Usuario("admin","admin","Administrador", Usuario.Role.ADMIN));
     }
 
     @FXML
@@ -58,14 +60,39 @@ public class LoginController {
         }
 
         var ctx = AppContext.get();
-        Usuario user = ctx.userRepository.get(username).orElseGet(() -> {
-            Usuario u = new Usuario(username, pass == null ? "" : pass, username);
-            ctx.userRepository.add(u);
-            return u;
-        });
+        Usuario.Role targetRole = "Administrador".equals(role) ? Usuario.Role.ADMIN : Usuario.Role.USER;
+        var opt = ctx.authService.authenticate(username, pass);
+        if (opt.isEmpty()) {
+            // Si no existe o contraseña no coincide, ofrecer registro rápido para rol USER
+            if (targetRole == Usuario.Role.USER) {
+                Alert ask = new Alert(Alert.AlertType.CONFIRMATION, "Usuario no registrado. ¿Desea registrarlo ahora?", ButtonType.YES, ButtonType.NO);
+                ask.setHeaderText("Registrar nuevo usuario");
+                var res = ask.showAndWait();
+                if (res.isPresent() && res.get() == ButtonType.YES) {
+                    Usuario created = ctx.authService.register(username, pass == null ? "" : pass, username, Usuario.Role.USER);
+                    try { ctx.authService.save(); } catch (Exception ignored) {}
+                    // continuar a vista de usuario
+                    Stage stage = (Stage) loginButton.getScene().getWindow();
+                    FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("user-view.fxml"));
+                    stage.setScene(new Scene(loader.load(), 900, 640));
+                    stage.setTitle("SyncUp - Usuario");
+                    stage.show();
+                    return;
+                }
+            }
+            messageLabel.setText("Credenciales inválidas o usuario no registrado");
+            new Alert(Alert.AlertType.ERROR, "Usuario o contraseña incorrectos").showAndWait();
+            return;
+        }
+        Usuario user = opt.get();
+        if (targetRole == Usuario.Role.ADMIN && user.getRole() != Usuario.Role.ADMIN) {
+            messageLabel.setText("Usuario no es Administrador");
+            new Alert(Alert.AlertType.WARNING, "Este usuario no tiene rol Administrador").showAndWait();
+            return;
+        }
 
         Stage stage = (Stage) loginButton.getScene().getWindow();
-        if ("Administrador".equals(role)) {
+        if (targetRole == Usuario.Role.ADMIN) {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("admin-view.fxml"));
             stage.setScene(new Scene(loader.load(), 800, 600));
             stage.setTitle("SyncUp - Admin");
@@ -75,6 +102,26 @@ public class LoginController {
             stage.setTitle("SyncUp - Usuario");
         }
         stage.show();
+    }
+
+    @FXML
+    public void onRegister(ActionEvent e) {
+        String username = usernameField.getText();
+        String pass = passwordField.getText();
+        String role = roleChoice.getValue();
+        if (username == null || username.isBlank()) { messageLabel.setText("Ingrese username"); return; }
+        if (pass == null || pass.isBlank()) { messageLabel.setText("Ingrese contraseña"); return; }
+        var ctx = AppContext.get();
+        if (ctx.userRepository.get(username).isPresent()) {
+            messageLabel.setText("Usuario ya existe");
+            new Alert(Alert.AlertType.WARNING, "El usuario ya existe").showAndWait();
+            return;
+        }
+        Usuario.Role targetRole = "Administrador".equals(role) ? Usuario.Role.ADMIN : Usuario.Role.USER;
+        ctx.authService.register(username, pass, username, targetRole);
+        try { ctx.authService.save(); } catch (Exception ignored) {}
+        messageLabel.setText("Registro exitoso. Ahora puede ingresar.");
+        new Alert(Alert.AlertType.INFORMATION, "Registro exitoso").showAndWait();
     }
 }
 

@@ -37,13 +37,18 @@
         <Button text="Agregar" onAction="#onAgregar"/>
         <Button text="Actualizar" onAction="#onActualizar"/>
         <Button text="Eliminar" onAction="#onEliminar"/>
+        <Button text="Cargar masivo..." onAction="#onBulkLoad"/>
       </HBox>
     </GridPane>
   </center>
   <right>
-    <VBox spacing="6" padding="10">
+    <VBox spacing="10" padding="10">
       <Label text="Catálogo"/>
-      <ListView fx:id="catalogList" prefWidth="300"/>
+      <ListView fx:id="catalogList" prefWidth="320"/>
+      <Separator />
+      <Label text="Usuarios"/>
+      <ListView fx:id="userList" prefWidth="320" prefHeight="160"/>
+      <Button text="Eliminar usuario seleccionado" onAction="#onDeleteSelectedUser"/>
     </VBox>
   </right>
 </BorderPane>

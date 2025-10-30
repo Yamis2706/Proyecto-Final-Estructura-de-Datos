@@ -21,7 +21,8 @@
   <left>
     <VBox spacing="6" style="-fx-padding:10;">
       <Label text="Título"/>
-      <TextField fx:id="searchTitleField" promptText="Escribe para autocompletar"/>
+      <TextField fx:id="searchTitleField" promptText="Escribe para autocompletar o buscar"/>
+      <Button fx:id="textSearchButton" text="Buscar por texto" onAction="#onTextSearch"/>
       <ListView fx:id="autocompleteList" prefWidth="220" prefHeight="200"/>
     </VBox>
   </left>

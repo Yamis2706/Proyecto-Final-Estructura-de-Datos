@@ -39,6 +39,23 @@ public class SongCatalog {
                 .filter(c -> c.getTitulo() != null && c.getTitulo().toLowerCase().contains(q))
                 .collect(Collectors.toList());
     }
+
+    public List<Cancion> findByArtistContains(String query) {
+        if (query == null || query.isBlank()) return Collections.emptyList();
+        String q = query.toLowerCase();
+        return idToSong.values().stream()
+                .filter(c -> c.getArtista() != null && c.getArtista().toLowerCase().contains(q))
+                .collect(Collectors.toList());
+    }
+
+    public List<Cancion> findByTitleOrArtistContains(String query) {
+        if (query == null || query.isBlank()) return Collections.emptyList();
+        String q = query.toLowerCase();
+        return idToSong.values().stream()
+                .filter(c -> (c.getTitulo() != null && c.getTitulo().toLowerCase().contains(q))
+                        || (c.getArtista() != null && c.getArtista().toLowerCase().contains(q)))
+                .collect(Collectors.toList());
+    }
 }
 
 

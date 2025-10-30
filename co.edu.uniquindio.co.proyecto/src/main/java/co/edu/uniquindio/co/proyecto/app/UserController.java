@@ -19,6 +19,7 @@ public class UserController {
 
     @FXML private TextField searchTitleField;
     @FXML private ListView<String> autocompleteList;
+    @FXML private Button textSearchButton;
     @FXML private TextField artistaField;
     @FXML private TextField generoField;
     @FXML private TextField anioField;
@@ -43,6 +44,20 @@ public class UserController {
             List<String> words = ctx.trie.buscarPorPrefijo(val == null ? "" : val);
             autocompleteList.setItems(FXCollections.observableArrayList(words));
         });
+        autocompleteList.setOnMouseClicked(evt -> {
+            String sel = autocompleteList.getSelectionModel().getSelectedItem();
+            if (sel != null) {
+                searchTitleField.setText(sel);
+                onTextSearch();
+            }
+        });
+    }
+
+    @FXML
+    public void onTextSearch() {
+        String q = searchTitleField.getText();
+        var res = ctx.songCatalog.findByTitleOrArtistContains(q);
+        resultsList.setItems(FXCollections.observableArrayList(res.stream().map(c -> c.getTitulo()+" - "+c.getArtista()).toList()));
     }
 
     @FXML
@@ -55,30 +70,32 @@ public class UserController {
         } catch (NumberFormatException ignored) { }
         var base = ctx.songCatalog.list();
         List<Cancion> res = ctx.searchService.advancedSearch(base, cr, logicChoice.getValue());
-        resultsList.setItems(FXCollections.observableArrayList(res.stream().map(Cancion::getTitulo).toList()));
+        resultsList.setItems(FXCollections.observableArrayList(res.stream().map(c -> c.getTitulo()+" - "+c.getArtista()).toList()));
     }
 
     @FXML
     public void onDiscovery() {
         var recs = ctx.recommendationService.descubrimientoSemanal(currentUser, ctx.songCatalog.list(), 20);
-        resultsList.setItems(FXCollections.observableArrayList(recs.stream().map(Cancion::getTitulo).toList()));
+        resultsList.setItems(FXCollections.observableArrayList(recs.stream().map(c -> c.getTitulo()+" - "+c.getArtista()).toList()));
     }
 
     @FXML
     public void onRadioFromSelection() {
         String title = resultsList.getSelectionModel().getSelectedItem();
         if (title == null) return;
-        Cancion start = ctx.songCatalog.list().stream().filter(c -> title.equals(c.getTitulo())).findFirst().orElse(null);
+        String selectedTitle = title.contains(" - ") ? title.substring(0, title.indexOf(" - ")) : title;
+        Cancion start = ctx.songCatalog.list().stream().filter(c -> selectedTitle.equals(c.getTitulo())).findFirst().orElse(null);
         if (start == null) return;
         Queue<Cancion> cola = ctx.radioService.generarRadio(ctx.grafoDeSimilitud, start, 15);
-        resultsList.setItems(FXCollections.observableArrayList(cola.stream().map(Cancion::getTitulo).toList()));
+        resultsList.setItems(FXCollections.observableArrayList(cola.stream().map(c -> c.getTitulo()+" - "+c.getArtista()).toList()));
     }
 
     @FXML
     public void onAddFavoriteFromResults() {
         String title = resultsList.getSelectionModel().getSelectedItem();
         if (title == null || currentUser == null) return;
-        Cancion song = ctx.songCatalog.list().stream().filter(c -> title.equals(c.getTitulo())).findFirst().orElse(null);
+        String selectedTitle = title.contains(" - ") ? title.substring(0, title.indexOf(" - ")) : title;
+        Cancion song = ctx.songCatalog.list().stream().filter(c -> selectedTitle.equals(c.getTitulo())).findFirst().orElse(null);
         if (song != null) {
             currentUser.agregarFavorito(song);
             favoritosList.setItems(FXCollections.observableArrayList(currentUser.getListaFavoritos().stream().map(Cancion::getTitulo).toList()));

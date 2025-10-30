@@ -7,9 +7,11 @@ import co.edu.uniquindio.co.proyecto.graph.GrafoSocial;
 import co.edu.uniquindio.co.proyecto.model.Cancion;
 import co.edu.uniquindio.co.proyecto.repository.UserRepository;
 import co.edu.uniquindio.co.proyecto.service.CsvService;
+import co.edu.uniquindio.co.proyecto.service.AuthService;
 import co.edu.uniquindio.co.proyecto.service.RadioService;
 import co.edu.uniquindio.co.proyecto.service.RecommendationService;
 import co.edu.uniquindio.co.proyecto.service.SearchService;
+import co.edu.uniquindio.co.proyecto.service.BulkImportService;
 
 import java.util.List;
 
@@ -28,8 +30,12 @@ public class AppContext {
     public final RecommendationService recommendationService = new RecommendationService();
     public final RadioService radioService = new RadioService();
     public final CsvService csvService = new CsvService();
+    public final AuthService authService = new AuthService(userRepository);
+    public final BulkImportService bulkImportService = new BulkImportService();
 
-    private AppContext() { }
+    private AppContext() {
+        authService.load();
+    }
 
     public void indexTitles(List<Cancion> canciones) {
         if (canciones == null) return;

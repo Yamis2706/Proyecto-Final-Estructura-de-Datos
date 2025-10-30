@@ -11,6 +11,7 @@ public class HelloApplication extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("login-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 640, 420);
+        scene.getStylesheets().add(HelloApplication.class.getResource("app.css").toExternalForm());
         stage.setTitle("SyncUp - Login");
         stage.setScene(scene);
         stage.show();

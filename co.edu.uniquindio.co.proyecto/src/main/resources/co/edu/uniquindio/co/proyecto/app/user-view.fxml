@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="co.edu.uniquindio.co.proyecto.app.UserController">
+  <top>
+    <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding:10;">
+      <Label text="Artista"/>
+      <TextField fx:id="artistaField" prefWidth="140"/>
+      <Label text="Género"/>
+      <TextField fx:id="generoField" prefWidth="120"/>
+      <Label text="Año"/>
+      <TextField fx:id="anioField" prefWidth="80"/>
+      <ChoiceBox fx:id="logicChoice"/>
+      <Button text="Buscar" onAction="#onAdvancedSearch"/>
+      <Button fx:id="discoveryButton" text="Descubrimiento" onAction="#onDiscovery"/>
+    </HBox>
+  </top>
+  <left>
+    <VBox spacing="6" style="-fx-padding:10;">
+      <Label text="Título"/>
+      <TextField fx:id="searchTitleField" promptText="Escribe para autocompletar"/>
+      <ListView fx:id="autocompleteList" prefWidth="220" prefHeight="200"/>
+    </VBox>
+  </left>
+  <center>
+    <VBox spacing="6" style="-fx-padding:10;">
+      <Label text="Resultados"/>
+      <ListView fx:id="resultsList" prefHeight="360"/>
+      <HBox spacing="8">
+        <Button fx:id="radioButton" text="Radio desde selección" onAction="#onRadioFromSelection"/>
+        <Button text="Agregar a Favoritos" onAction="#onAddFavoriteFromResults"/>
+      </HBox>
+    </VBox>
+  </center>
+  <right>
+    <VBox spacing="6" style="-fx-padding:10;">
+      <Label text="Favoritos"/>
+      <ListView fx:id="favoritosList" prefWidth="240"/>
+      <Button fx:id="exportCsvButton" text="Exportar CSV" onAction="#onExportCsv"/>
+    </VBox>
+  </right>
+</BorderPane>
+
+

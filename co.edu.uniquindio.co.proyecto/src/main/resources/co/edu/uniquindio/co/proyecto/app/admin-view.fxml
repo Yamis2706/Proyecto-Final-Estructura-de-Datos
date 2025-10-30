@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="co.edu.uniquindio.co.proyecto.app.AdminController">
+  <center>
+    <GridPane hgap="10" vgap="10" padding="10">
+      <columnConstraints>
+        <ColumnConstraints percentWidth="20"/>
+        <ColumnConstraints percentWidth="30"/>
+        <ColumnConstraints percentWidth="20"/>
+        <ColumnConstraints percentWidth="30"/>
+      </columnConstraints>
+      <rowConstraints>
+        <RowConstraints />
+        <RowConstraints />
+        <RowConstraints />
+      </rowConstraints>
+      <Label text="ID" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+      <TextField fx:id="idField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+      <Label text="Título" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+      <TextField fx:id="tituloField" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+      <Label text="Artista" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+      <TextField fx:id="artistaField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+      <Label text="Género" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+      <TextField fx:id="generoField" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+      <Label text="Año" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+      <TextField fx:id="anioField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+      <Label text="Duración (s)" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+      <TextField fx:id="duracionField" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+      <HBox spacing="8" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="4">
+        <Button text="Agregar" onAction="#onAgregar"/>
+        <Button text="Actualizar" onAction="#onActualizar"/>
+        <Button text="Eliminar" onAction="#onEliminar"/>
+      </HBox>
+    </GridPane>
+  </center>
+  <right>
+    <VBox spacing="6" padding="10">
+      <Label text="Catálogo"/>
+      <ListView fx:id="catalogList" prefWidth="300"/>
+    </VBox>
+  </right>
+</BorderPane>
+
+

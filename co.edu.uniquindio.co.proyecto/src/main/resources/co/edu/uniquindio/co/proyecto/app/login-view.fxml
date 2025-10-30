@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="co.edu.uniquindio.co.proyecto.app.LoginController">
+  <center>
+    <VBox spacing="10" alignment="CENTER">
+      <padding>
+        <Insets top="40" right="40" bottom="40" left="40" />
+      </padding>
+      <Label text="SyncUp" style="-fx-font-size: 22px; -fx-font-weight: bold;" />
+      <TextField fx:id="usernameField" promptText="Usuario" />
+      <PasswordField fx:id="passwordField" promptText="Contraseña" />
+      <ChoiceBox fx:id="roleChoice" />
+      <Button fx:id="loginButton" text="Ingresar" onAction="#onLogin" maxWidth="Infinity" />
+      <Label fx:id="messageLabel" textFill="red" />
+    </VBox>
+  </center>
+</BorderPane>
+
+

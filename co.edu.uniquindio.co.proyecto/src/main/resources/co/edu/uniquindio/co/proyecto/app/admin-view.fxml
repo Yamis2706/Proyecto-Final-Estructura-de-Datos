@@ -17,6 +17,7 @@
         <RowConstraints />
         <RowConstraints />
         <RowConstraints />
+        <RowConstraints />
       </rowConstraints>
       <Label text="ID" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
       <TextField fx:id="idField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>

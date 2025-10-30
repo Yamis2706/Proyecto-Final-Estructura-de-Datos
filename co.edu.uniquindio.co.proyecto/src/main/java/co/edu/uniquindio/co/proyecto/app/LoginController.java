@@ -9,7 +9,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.util.List;
 
 public class LoginController {
@@ -49,7 +48,7 @@ public class LoginController {
     }
 
     @FXML
-    public void onLogin(ActionEvent e) throws IOException {
+    public void onLogin(ActionEvent e) {
         String username = usernameField.getText();
         String pass = passwordField.getText();
         String role = roleChoice.getValue();
@@ -60,23 +59,26 @@ public class LoginController {
         }
 
         var ctx = AppContext.get();
-        Usuario.Role targetRole = "Administrador".equals(role) ? Usuario.Role.ADMIN : Usuario.Role.USER;
         var opt = ctx.authService.authenticate(username, pass);
         if (opt.isEmpty()) {
             // Si no existe o contraseña no coincide, ofrecer registro rápido para rol USER
-            if (targetRole == Usuario.Role.USER) {
+            if ("Usuario".equals(role)) {
                 Alert ask = new Alert(Alert.AlertType.CONFIRMATION, "Usuario no registrado. ¿Desea registrarlo ahora?", ButtonType.YES, ButtonType.NO);
                 ask.setHeaderText("Registrar nuevo usuario");
                 var res = ask.showAndWait();
                 if (res.isPresent() && res.get() == ButtonType.YES) {
-                    Usuario created = ctx.authService.register(username, pass == null ? "" : pass, username, Usuario.Role.USER);
+                    ctx.authService.register(username, pass == null ? "" : pass, username, Usuario.Role.USER);
                     try { ctx.authService.save(); } catch (Exception ignored) {}
                     // continuar a vista de usuario
-                    Stage stage = (Stage) loginButton.getScene().getWindow();
-                    FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("user-view.fxml"));
-                    stage.setScene(new Scene(loader.load(), 900, 640));
-                    stage.setTitle("SyncUp - Usuario");
-                    stage.show();
+                    try {
+                        Stage stage = (Stage) loginButton.getScene().getWindow();
+                        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("user-view.fxml"));
+                        stage.setScene(new Scene(loader.load(), 900, 640));
+                        stage.setTitle("SyncUp - Usuario");
+                        stage.show();
+                    } catch (Exception ex) {
+                        new Alert(Alert.AlertType.ERROR, "No se pudo abrir la vista: " + ex.getMessage()).showAndWait();
+                    }
                     return;
                 }
             }
@@ -84,24 +86,24 @@ public class LoginController {
             new Alert(Alert.AlertType.ERROR, "Usuario o contraseña incorrectos").showAndWait();
             return;
         }
-        Usuario user = opt.get();
-        if (targetRole == Usuario.Role.ADMIN && user.getRole() != Usuario.Role.ADMIN) {
-            messageLabel.setText("Usuario no es Administrador");
-            new Alert(Alert.AlertType.WARNING, "Este usuario no tiene rol Administrador").showAndWait();
-            return;
+        try {
+            Usuario user = opt.get();
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            if (user.getRole() == Usuario.Role.ADMIN) {
+                FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("admin-view.fxml"));
+                stage.setScene(new Scene(loader.load(), 800, 600));
+                stage.setTitle("SyncUp - Admin");
+            } else {
+                FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("user-view.fxml"));
+                stage.setScene(new Scene(loader.load(), 900, 640));
+                stage.setTitle("SyncUp - Usuario");
+            }
+            stage.show();
+        } catch (Exception ex) {
+            String msg = ex.getClass().getSimpleName()+": "+(ex.getMessage()==null?"":ex.getMessage());
+            if (ex.getCause()!=null) msg += "\nCausa: "+ex.getCause().getClass().getSimpleName()+": "+(ex.getCause().getMessage()==null?"":ex.getCause().getMessage());
+            new Alert(Alert.AlertType.ERROR, "No se pudo abrir la vista:\n" + msg).showAndWait();
         }
-
-        Stage stage = (Stage) loginButton.getScene().getWindow();
-        if (targetRole == Usuario.Role.ADMIN) {
-            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("admin-view.fxml"));
-            stage.setScene(new Scene(loader.load(), 800, 600));
-            stage.setTitle("SyncUp - Admin");
-        } else {
-            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("user-view.fxml"));
-            stage.setScene(new Scene(loader.load(), 900, 640));
-            stage.setTitle("SyncUp - Usuario");
-        }
-        stage.show();
     }
 
     @FXML

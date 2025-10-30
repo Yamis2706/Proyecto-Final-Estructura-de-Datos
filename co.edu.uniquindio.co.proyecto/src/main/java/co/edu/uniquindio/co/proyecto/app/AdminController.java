@@ -23,8 +23,16 @@ public class AdminController {
 
     @FXML
     public void initialize() {
-        refrescarLista();
-        refrescarUsuarios();
+        try {
+            if (catalogList != null) {
+                refrescarLista();
+            }
+            if (userList != null) {
+                refrescarUsuarios();
+            }
+        } catch (Exception ex) {
+            new Alert(Alert.AlertType.ERROR, "Error inicializando Admin: " + ex.getMessage()).showAndWait();
+        }
     }
 
     @FXML

@@ -4,54 +4,67 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="co.edu.uniquindio.co.proyecto.app.AdminController">
-  <center>
-    <GridPane hgap="10" vgap="10" padding="10">
-      <columnConstraints>
-        <ColumnConstraints percentWidth="20"/>
-        <ColumnConstraints percentWidth="30"/>
-        <ColumnConstraints percentWidth="20"/>
-        <ColumnConstraints percentWidth="30"/>
-      </columnConstraints>
-      <rowConstraints>
-        <RowConstraints />
-        <RowConstraints />
-        <RowConstraints />
-        <RowConstraints />
-      </rowConstraints>
-      <Label text="ID" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-      <TextField fx:id="idField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-      <Label text="Título" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
-      <TextField fx:id="tituloField" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.uniquindio.co.proyecto.app.AdminController"
+            prefWidth="900" prefHeight="640"
+            style="-fx-background-color: #F7F4FF;">
 
-      <Label text="Artista" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-      <TextField fx:id="artistaField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-      <Label text="Género" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-      <TextField fx:id="generoField" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+  <!-- PANEL SUPERIOR -->
+  <top>
+    <HBox spacing="20" alignment="CENTER_LEFT"
+          style="-fx-background-color: #6A57A5; -fx-padding: 18;">
+      <Label text="Panel Administrador - SyncUp"
+             style="-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    </HBox>
+  </top>
 
-      <Label text="Año" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-      <TextField fx:id="anioField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-      <Label text="Duración (s)" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
-      <TextField fx:id="duracionField" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+  <!-- PANEL IZQUIERDO -->
+  <left>
+    <VBox spacing="18" alignment="TOP_CENTER"
+          prefWidth="240"
+          style="-fx-background-color: #2E2A62; -fx-padding: 20;">
 
-      <HBox spacing="8" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="4">
-        <Button text="Agregar" onAction="#onAgregar"/>
-        <Button text="Actualizar" onAction="#onActualizar"/>
-        <Button text="Eliminar" onAction="#onEliminar"/>
-        <Button text="Cargar masivo..." onAction="#onBulkLoad"/>
-      </HBox>
-    </GridPane>
-  </center>
-  <right>
-    <VBox spacing="10" padding="10">
-      <Label text="Catálogo"/>
-      <ListView fx:id="catalogList" prefWidth="320"/>
-      <Separator />
-      <Label text="Usuarios"/>
-      <ListView fx:id="userList" prefWidth="320" prefHeight="160"/>
-      <Button text="Eliminar usuario seleccionado" onAction="#onDeleteSelectedUser"/>
+      <Button text="➕ Registrar Canción"
+              onAction="#onRegisterSong"
+              style="-fx-background-radius: 12; -fx-background-color: #8E7CC3; -fx-text-fill: white;"
+              prefWidth="200"/>
+
+      <Button text="✏ Editar Canción"
+              onAction="#onEditSong"
+              style="-fx-background-radius: 12; -fx-background-color: #8E7CC3; -fx-text-fill: white;"
+              prefWidth="200"/>
+
+      <Button text="❌ Eliminar Canción"
+              onAction="#onDeleteSong"
+              style="-fx-background-radius: 12; -fx-background-color: #8E7CC3; -fx-text-fill: white;"
+              prefWidth="200"/>
+
+      <Button text="🚪 Salir"
+              onAction="#onLogout"
+              style="-fx-background-radius: 12; -fx-background-color: #B28BFF; -fx-text-fill: white;"
+              prefWidth="200"/>
+
     </VBox>
-  </right>
-</BorderPane>
+  </left>
 
+  <!-- PANEL CENTRAL -->
+  <center>
+    <VBox spacing="20" alignment="TOP_CENTER" style="-fx-padding: 20;">
+
+      <TableView fx:id="songTable" prefHeight="500" prefWidth="650">
+        <columns>
+          <TableColumn fx:id="colId" text="ID" prefWidth="80"/>
+          <TableColumn fx:id="colTitulo" text="Título" prefWidth="160"/>
+          <TableColumn fx:id="colArtista" text="Artista" prefWidth="160"/>
+          <TableColumn fx:id="colGenero" text="Género" prefWidth="120"/>
+          <TableColumn fx:id="colAnio" text="Año" prefWidth="80"/>
+          <TableColumn fx:id="colDuracion" text="Duración (seg)" prefWidth="120"/>
+        </columns>
+      </TableView>
+
+    </VBox>
+  </center>
+
+</BorderPane>
 

@@ -2,60 +2,143 @@ package co.edu.uniquindio.co.proyecto.catalog;
 
 import co.edu.uniquindio.co.proyecto.model.Cancion;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
+/**
+ * Catálogo de canciones del sistema.
+ * Soporta agregar, actualizar, eliminar y consultar canciones.
+ */
 public class SongCatalog {
-    private final Map<String, Cancion> idToSong = new HashMap<>();
 
-    public boolean add(Cancion c) {
-        if (c == null) return false;
-        return idToSong.putIfAbsent(c.getId(), c) == null;
+    // Lista principal de canciones
+    private final List<Cancion> list = new ArrayList<>();
+
+    // -------------------------------------------------------------------------
+    //   GETTERS Y SETTERS PARA PERSISTENCIA
+    // -------------------------------------------------------------------------
+
+    /**
+     * Devuelve la lista de canciones (copia para seguridad).
+     */
+    public List<Cancion> getCanciones() {
+        return new ArrayList<>(list);
     }
 
-    public boolean update(Cancion c) {
-        if (c == null) return false;
-        if (!idToSong.containsKey(c.getId())) return false;
-        idToSong.put(c.getId(), c);
+    /**
+     * Reemplaza completamente el catálogo (para cargar desde archivo).
+     */
+    public void setCanciones(List<Cancion> canciones) {
+        list.clear();
+        if (canciones != null) {
+            list.addAll(canciones);
+        }
+    }
+
+    public void clear() {
+        list.clear();
+    }
+
+    // -------------------------------------------------------------------------
+    //   CONSULTAS
+    // -------------------------------------------------------------------------
+
+    /**
+     * Devuelve una vista directa de la lista (solo lectura recomendada).
+     */
+    public List<Cancion> list() {
+        return list;
+    }
+
+    /**
+     * Devuelve una canción por id.
+     */
+    public Optional<Cancion> get(String id) {
+        if (id == null) return Optional.empty();
+        return list.stream().filter(c -> c.getId().equals(id)).findFirst();
+    }
+
+    /**
+     * Verifica si existe una canción con ese ID.
+     */
+    public boolean existsId(String id) {
+        return get(id).isPresent();
+    }
+
+    // -------------------------------------------------------------------------
+    //   AGREGAR
+    // -------------------------------------------------------------------------
+
+    /**
+     * Agrega una nueva canción si el ID no existe.
+     * @return true si se agregó, false si ya existe ese id.
+     */
+    public boolean add(Cancion c) {
+        if (c == null || c.getId() == null) return false;
+        if (existsId(c.getId())) return false;
+        list.add(c);
         return true;
     }
 
+    // -------------------------------------------------------------------------
+    //   ACTUALIZAR
+    // -------------------------------------------------------------------------
+
+    /**
+     * Actualiza una canción existente con mismo ID.
+     * @return true si se modificó, false si no existe.
+     */
+    public boolean update(Cancion newSong) {
+        if (newSong == null || newSong.getId() == null) return false;
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().equals(newSong.getId())) {
+                list.set(i, newSong);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // -------------------------------------------------------------------------
+    //   ELIMINAR
+    // -------------------------------------------------------------------------
+
+    /**
+     * Elimina una canción por id.
+     * @return true si se eliminó, false si no existe.
+     */
     public boolean remove(String id) {
-        return idToSong.remove(id) != null;
+        if (id == null) return false;
+        return list.removeIf(c -> c.getId().equals(id));
     }
 
-    public Optional<Cancion> get(String id) {
-        return Optional.ofNullable(idToSong.get(id));
-    }
+    // -------------------------------------------------------------------------
+    //   BÚSQUEDA BÁSICA (para UserController)
+    // -------------------------------------------------------------------------
 
-    public List<Cancion> list() {
-        return new ArrayList<>(idToSong.values());
-    }
+    /**
+     * Busca canciones cuyo título o artista contengan el texto.
+     */
+    public List<Cancion> findByTitleOrArtistContains(String texto) {
+        if (texto == null || texto.isBlank()) return Collections.emptyList();
 
-    public List<Cancion> findByTitleContains(String query) {
-        if (query == null || query.isBlank()) return Collections.emptyList();
-        String q = query.toLowerCase();
-        return idToSong.values().stream()
-                .filter(c -> c.getTitulo() != null && c.getTitulo().toLowerCase().contains(q))
-                .collect(Collectors.toList());
-    }
+        String t = texto.toLowerCase();
 
-    public List<Cancion> findByArtistContains(String query) {
-        if (query == null || query.isBlank()) return Collections.emptyList();
-        String q = query.toLowerCase();
-        return idToSong.values().stream()
-                .filter(c -> c.getArtista() != null && c.getArtista().toLowerCase().contains(q))
-                .collect(Collectors.toList());
-    }
+        List<Cancion> result = new ArrayList<>();
+        for (Cancion c : list) {
+            if (c == null) continue;
 
-    public List<Cancion> findByTitleOrArtistContains(String query) {
-        if (query == null || query.isBlank()) return Collections.emptyList();
-        String q = query.toLowerCase();
-        return idToSong.values().stream()
-                .filter(c -> (c.getTitulo() != null && c.getTitulo().toLowerCase().contains(q))
-                        || (c.getArtista() != null && c.getArtista().toLowerCase().contains(q)))
-                .collect(Collectors.toList());
+            boolean matchesTitle =
+                    c.getTitulo() != null && c.getTitulo().toLowerCase().contains(t);
+            boolean matchesArtist =
+                    c.getArtista() != null && c.getArtista().toLowerCase().contains(t);
+
+            if (matchesTitle || matchesArtist) {
+                result.add(c);
+            }
+        }
+        return result;
     }
 }
-
-

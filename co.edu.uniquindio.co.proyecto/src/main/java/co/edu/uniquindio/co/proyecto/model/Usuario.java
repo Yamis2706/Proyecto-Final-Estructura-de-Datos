@@ -14,9 +14,7 @@ public class Usuario {
     private final LinkedList<Cancion> listaFavoritos;
 
     public Usuario(String username, String password, String nombre) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("username no puede ser nulo o vacío");
-        }
+        if (username == null || username.isBlank()) throw new IllegalArgumentException("username no puede ser nulo");
         this.username = username;
         this.password = password;
         this.nombre = nombre;
@@ -28,52 +26,44 @@ public class Usuario {
         this.role = role == null ? Role.USER : role;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
+    public String getUsername() { return username; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
     public Role getRole() { return role; }
-
     public void setRole(Role role) { this.role = role == null ? Role.USER : role; }
 
-    public LinkedList<Cancion> getListaFavoritos() {
-        return listaFavoritos;
-    }
-
+    // ---- Favoritos API compatible con tests ----
     public void agregarFavorito(Cancion cancion) {
-        if (cancion != null && !listaFavoritos.contains(cancion)) {
-            listaFavoritos.add(cancion);
-        }
+        if (cancion == null) return;
+        if (!listaFavoritos.contains(cancion)) listaFavoritos.add(cancion);
     }
 
     public boolean eliminarFavorito(Cancion cancion) {
+        if (cancion == null) return false;
         return listaFavoritos.remove(cancion);
     }
 
-    public List<Cancion> listarFavoritos() {
+    /**
+     * Nombre usado por tests y por código legado: getListaFavoritos()
+     */
+    public List<Cancion> getListaFavoritos() {
         return List.copyOf(listaFavoritos);
     }
 
+    /**
+     * Alias moderno: getFavoritos()
+     */
+    public LinkedList<Cancion> getFavoritos() {
+        return listaFavoritos;
+    }
+
+    // ---- equals & hashCode (por username) ----
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Usuario)) return false;
         Usuario usuario = (Usuario) o;
         return username.equals(usuario.username);
     }
@@ -85,12 +75,6 @@ public class Usuario {
 
     @Override
     public String toString() {
-        return "Usuario{" +
-                "username='" + username + '\'' +
-                ", nombre='" + nombre + '\'' +
-                ", favoritos=" + listaFavoritos.size() +
-                '}';
+        return "Usuario{" + "username='" + username + '\'' + ", nombre='" + nombre + '\'' + ", role=" + role + '}';
     }
 }
-
-

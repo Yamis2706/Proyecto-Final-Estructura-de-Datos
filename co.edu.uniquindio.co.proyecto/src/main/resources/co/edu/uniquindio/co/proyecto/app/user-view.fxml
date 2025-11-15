@@ -4,45 +4,70 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="co.edu.uniquindio.co.proyecto.app.UserController">
-  <top>
-    <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding:10;">
-      <Label text="Artista"/>
-      <TextField fx:id="artistaField" prefWidth="140"/>
-      <Label text="Género"/>
-      <TextField fx:id="generoField" prefWidth="120"/>
-      <Label text="Año"/>
-      <TextField fx:id="anioField" prefWidth="80"/>
-      <ChoiceBox fx:id="logicChoice"/>
-      <Button text="Buscar" onAction="#onAdvancedSearch"/>
-      <Button fx:id="discoveryButton" text="Descubrimiento" onAction="#onDiscovery"/>
-    </HBox>
-  </top>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.uniquindio.co.proyecto.app.UserController"
+            prefWidth="900" prefHeight="640"
+            style="-fx-background-color: #F7F4FF;">
+
+  <!-- ██████████████████████████████████████
+       LATERAL IZQUIERDO (MENU)
+  ███████████████████████████████████████ -->
   <left>
-    <VBox spacing="6" style="-fx-padding:10;">
-      <Label text="Título"/>
-      <TextField fx:id="searchTitleField" promptText="Escribe para autocompletar o buscar"/>
-      <Button fx:id="textSearchButton" text="Buscar por texto" onAction="#onTextSearch"/>
-      <ListView fx:id="autocompleteList" prefWidth="220" prefHeight="200"/>
+    <VBox spacing="20" prefWidth="220" alignment="TOP_CENTER"
+          style="-fx-background-color: #2E2A62; -fx-padding: 25 10 25 10;">
+
+      <Label text="SyncUp"
+             style="-fx-font-size: 32px; -fx-text-fill: white; -fx-font-weight: bold;" />
+
+      <Button text="🎵  Catálogo"
+              onAction="#onShowCatalog"
+              style="-fx-background-color: transparent; -fx-text-fill: #CFC3FF; -fx-font-size: 16px;" />
+
+      <Button text="⭐  Favoritos"
+              onAction="#onShowFavorites"
+              style="-fx-background-color: transparent; -fx-text-fill: #CFC3FF; -fx-font-size: 16px;" />
+
+      <Button text="🔍  Buscar"
+              onAction="#onSearchSongs"
+              style="-fx-background-color: transparent; -fx-text-fill: #CFC3FF; -fx-font-size: 16px;" />
+
+      <Button text="🚪  Cerrar sesión"
+              onAction="#onLogout"
+              style="-fx-background-color: #8E7CC3; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 10;" />
+
     </VBox>
   </left>
+
+  <!-- ██████████████████████████████████████
+       PANEL PRINCIPAL
+  ███████████████████████████████████████ -->
   <center>
-    <VBox spacing="6" style="-fx-padding:10;">
-      <Label text="Resultados"/>
-      <ListView fx:id="resultsList" prefHeight="360"/>
-      <HBox spacing="8">
-        <Button fx:id="radioButton" text="Radio desde selección" onAction="#onRadioFromSelection"/>
-        <Button text="Agregar a Favoritos" onAction="#onAddFavoriteFromResults"/>
-      </HBox>
+    <VBox spacing="16" alignment="TOP_CENTER"
+          style="-fx-padding: 20;">
+
+      <TextField fx:id="searchField"
+                 promptText="Buscar canción por título o artista"
+                 style="-fx-background-radius: 12; -fx-padding: 10; -fx-background-color: #FFFFFF;"
+                 prefWidth="600"/>
+
+      <Button text="Buscar"
+              onAction="#onSearch"
+              style="-fx-background-color: #8E7CC3; -fx-text-fill: white; -fx-background-radius: 12;"
+              prefWidth="200"/>
+
+      <TableView fx:id="songTable" prefHeight="500" prefWidth="750">
+        <columns>
+          <TableColumn fx:id="colId" text="ID" prefWidth="80"/>
+          <TableColumn fx:id="colTitulo" text="Título" prefWidth="220"/>
+          <TableColumn fx:id="colArtista" text="Artista" prefWidth="180"/>
+          <TableColumn fx:id="colGenero" text="Género" prefWidth="120"/>
+          <TableColumn fx:id="colAnio" text="Año" prefWidth="80"/>
+        </columns>
+      </TableView>
+
     </VBox>
   </center>
-  <right>
-    <VBox spacing="6" style="-fx-padding:10;">
-      <Label text="Favoritos"/>
-      <ListView fx:id="favoritosList" prefWidth="240"/>
-      <Button fx:id="exportCsvButton" text="Exportar CSV" onAction="#onExportCsv"/>
-    </VBox>
-  </right>
-</BorderPane>
 
+</BorderPane>
 

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.uniquindio.co.proyecto.app.SongFormController"
+            prefWidth="450" prefHeight="400"
+            style="-fx-background-color: #F7F4FF;">
+
+    <VBox spacing="12" alignment="CENTER"
+          layoutX="30" layoutY="20" prefWidth="390">
+
+        <Label text="Formulario Canción"
+               style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+
+        <TextField fx:id="txtId" promptText="ID"/>
+        <TextField fx:id="txtTitulo" promptText="Título"/>
+        <TextField fx:id="txtArtista" promptText="Artista"/>
+        <TextField fx:id="txtGenero" promptText="Género"/>
+        <TextField fx:id="txtAnio" promptText="Año"/>
+        <TextField fx:id="txtDuracion" promptText="Duración en Segundos"/>
+
+        <Button text="Guardar" onAction="#onGuardar"
+                style="-fx-background-color:#8E7CC3; -fx-text-fill:white; -fx-background-radius: 10;"/>
+
+        <Button text="Cancelar" onAction="#onCancelar"
+                style="-fx-background-color:#C2B7E1; -fx-text-fill:white; -fx-background-radius: 10;"/>
+
+    </VBox>
+
+</AnchorPane>
+

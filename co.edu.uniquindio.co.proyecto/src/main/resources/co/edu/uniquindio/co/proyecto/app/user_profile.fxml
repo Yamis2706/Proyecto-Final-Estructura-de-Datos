@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="co.edu.uniquindio.co.proyecto.app.ProfileController"
+      alignment="CENTER" spacing="20" padding="30">
+
+    <Label text="Mi Perfil" styleClass="label-title"/>
+
+    <VBox spacing="10" alignment="CENTER">
+        <Label text="Nombre:" styleClass="label-subtitle"/>
+        <Label fx:id="nameLabel" text=""/>
+
+        <Label text="Usuario:" styleClass="label-subtitle"/>
+        <Label fx:id="usernameLabel" text=""/>
+
+        <Label text="Rol:" styleClass="label-subtitle"/>
+        <Label fx:id="roleLabel" text=""/>
+    </VBox>
+
+    <HBox spacing="15">
+        <Button text="Volver" styleClass="button-secondary" onAction="#onBack"/>
+    </HBox>
+
+</VBox>

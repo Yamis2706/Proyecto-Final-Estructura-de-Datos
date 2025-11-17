@@ -1,10 +1,11 @@
 package co.edu.uniquindio.co.proyecto.app;
 
 import co.edu.uniquindio.co.proyecto.model.Cancion;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TextField;
-import javafx.stage.Stage;
+import javafx.scene.control.*;
+
+import java.util.function.Consumer;
 
 public class SongFormController {
 
@@ -14,115 +15,66 @@ public class SongFormController {
     @FXML private TextField txtGenero;
     @FXML private TextField txtAnio;
     @FXML private TextField txtDuracion;
+    @FXML private Button btnSave;
+    @FXML private Button btnCancel;
+    @FXML private Label lblMsg;
 
-    private Cancion editSong;           // si no es null -> estamos editando
+    private Runnable onSaveCallback;
     private final AppContext ctx = AppContext.get();
+    private boolean editing = false;
 
-    /**
-     * Llamado desde AdminController cuando abrimos el formulario para edición.
-     */
+    public void setOnSaveCallback(Runnable r) { this.onSaveCallback = r; }
+
     public void cargarCancion(Cancion c) {
         if (c == null) return;
-        editSong = c;
-
+        editing = true;
         txtId.setText(c.getId());
-        txtId.setDisable(true); // no permitimos cambiar ID en edición
-
+        txtId.setDisable(true); // no editar id
         txtTitulo.setText(c.getTitulo());
         txtArtista.setText(c.getArtista());
         txtGenero.setText(c.getGenero());
         txtAnio.setText(String.valueOf(c.getAnio()));
-        txtDuracion.setText(String.valueOf(c.getDuracionSegundos()));
+        // intenta getter de duración
+        try { txtDuracion.setText(String.valueOf(c.getDuracionSegundos())); } catch (Throwable ignored) {}
     }
 
     @FXML
-    private void onGuardar() {
+    private void onSave(ActionEvent e) {
         try {
-            String id = safeGet(txtId);
-            String titulo = safeGet(txtTitulo);
-            String artista = safeGet(txtArtista);
-            String genero = safeGet(txtGenero);
-            String anioTxt = safeGet(txtAnio);
-            String durTxt = safeGet(txtDuracion);
+            String id = txtId.getText().trim();
+            String t = txtTitulo.getText().trim();
+            String art = txtArtista.getText().trim();
+            String gen = txtGenero.getText().trim();
+            int anio = Integer.parseInt(txtAnio.getText().trim());
+            int dur = Integer.parseInt(txtDuracion.getText().trim());
 
-            if (id.isBlank()) { showError("ID requerido"); return; }
-            if (titulo.isBlank()) { showError("Título requerido"); return; }
-
-            int anio = 0;
-            int duracion = 0;
-            if (!anioTxt.isBlank()) {
-                try { anio = Integer.parseInt(anioTxt); }
-                catch (NumberFormatException nf) { showError("Año inválido"); return; }
-            }
-            if (!durTxt.isBlank()) {
-                try { duracion = Integer.parseInt(durTxt); }
-                catch (NumberFormatException nf) { showError("Duración inválida"); return; }
-            }
-
-            if (editSong == null) {
-                // Crear nueva canción
-                Cancion nueva = new Cancion(id, titulo, artista, genero, anio, duracion);
-
-                // Usar el método de AppContext que hace la persistencia
-                // (AppContext.addSong(...) debe insertar en catálogo y guardar en disco)
-                if (!ctx.songCatalog.add(nueva)) {
-                    showError("Ya existe una canción con ese ID");
-                    return;
-                }
-                // Persistir a través de AppContext si tienes addSong que guarda:
-                try {
-                    ctx.addSong(nueva); // este método también agrega y persiste (si lo implementaste)
-                } catch (Exception ignored) {
-                    // si no existe ctx.addSong, ya agregamos al catálogo arriba; en ese caso
-                    // asegúrate de llamar a DataManager.saveSongs(...) desde donde corresponda.
-                }
+            Cancion c = new Cancion(id, t, art, gen, anio, dur);
+            if (editing) {
+                // actualizar
+                boolean ok = ctx.songCatalog.update(c);
+                if (!ok) { lblMsg.setText("No existe ID para actualizar"); return; }
+                ctx.updateSong(c); // si tu AppContext hace persistencia
             } else {
-                // Editar existente
-                // Construyo una nueva instancia con el mismo id
-                Cancion actualizada = new Cancion(editSong.getId(), titulo, artista, genero, anio, duracion);
-
-                // Actualizo catálogo y persisto:
-                boolean ok = ctx.songCatalog.update(actualizada);
-                if (!ok) {
-                    showError("No se pudo actualizar (ID no existe)");
-                    return;
-                }
-                try {
-                    ctx.updateSong(actualizada); // si AppContext tiene este método persistente
-                } catch (Exception ignored) { }
+                boolean ok = ctx.songCatalog.add(c);
+                if (!ok) { lblMsg.setText("ID ya existe"); return; }
+                ctx.addSong(c);
             }
 
-            // Asegurarse de que trie/estructuras estén actualizadas
-            try { ctx.indexTitles(ctx.songCatalog.list()); } catch (Exception ignored) { }
-
-            // cerrar formulario
-            closeWindow();
-
-        } catch (Exception e) {
-            showError("Error al guardar: " + e.getMessage());
+            if (onSaveCallback != null) onSaveCallback.run();
+            // cerrar ventana:
+            btnSave.getScene().getWindow().hide();
+        } catch (NumberFormatException ex) {
+            lblMsg.setText("Año/duración inválidos");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            lblMsg.setText("Error: " + ex.getMessage());
         }
     }
 
     @FXML
-    private void onCancelar() {
-        closeWindow();
-    }
-
-    // ---------- Helpers ----------
-
-    private void closeWindow() {
-        Stage st = (Stage) txtId.getScene().getWindow();
-        st.close();
-    }
-
-    private void showError(String msg) {
-        new Alert(Alert.AlertType.ERROR, msg).showAndWait();
-    }
-
-    private String safeGet(TextField tf) {
-        if (tf == null) return "";
-        String v = tf.getText();
-        return v == null ? "" : v.trim();
+    private void onCancel(ActionEvent e) {
+        btnCancel.getScene().getWindow().hide();
     }
 }
+
 

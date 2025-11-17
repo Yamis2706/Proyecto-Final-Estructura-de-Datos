@@ -7,13 +7,21 @@ import javafx.stage.Stage;
 
 public class ViewLoader {
 
+    private static final String BASE_PATH = "/co.edu.uniquindio.co.proyecto/app/";
+
+    /**
+     * Carga un FXML y devuelve el Parent
+     */
     public static Parent load(String fxml) throws Exception {
-        return FXMLLoader.load(ViewLoader.class.getResource(fxml));
+        return FXMLLoader.load(ViewLoader.class.getResource(BASE_PATH + fxml));
     }
 
+    /**
+     * Carga una vista dentro de un Stage existente
+     */
     public static void setView(Stage stage, String fxml, String title) {
         try {
-            FXMLLoader loader = new FXMLLoader(ViewLoader.class.getResource(fxml));
+            FXMLLoader loader = new FXMLLoader(ViewLoader.class.getResource(BASE_PATH + fxml));
             Parent root = loader.load();
 
             if (stage.getScene() == null) {
@@ -27,7 +35,7 @@ public class ViewLoader {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("No se pudo cargar la vista: " + fxml, e);
+            throw new RuntimeException("No se pudo cargar la vista: " + BASE_PATH + fxml, e);
         }
     }
 }

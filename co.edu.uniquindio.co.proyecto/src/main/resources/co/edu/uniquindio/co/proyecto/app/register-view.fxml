@@ -1,44 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
 
-<AnchorPane prefWidth="500" prefHeight="520"
-            style="-fx-background-color: linear-gradient(to bottom, #6A57A5, #2E2A62);"
+<AnchorPane style="-fx-background-color: linear-gradient(to bottom, #6A57A5, #2E2A62);" prefWidth="500" prefHeight="520"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="co.edu.uniquindio.co.proyecto.app.RegisterController">
 
-    <children>
-        <VBox alignment="CENTER" spacing="18"
-              AnchorPane.topAnchor="40" AnchorPane.leftAnchor="40" AnchorPane.rightAnchor="40">
+    <VBox alignment="CENTER" spacing="18" AnchorPane.topAnchor="40" AnchorPane.leftAnchor="40" AnchorPane.rightAnchor="40">
 
-            <Label text="Crear cuenta"
-                   style="-fx-font-size: 28px; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        <Label text="Crear cuenta" style="-fx-font-size: 28px; -fx-text-fill: white; -fx-font-weight: bold;"/>
 
-            <TextField fx:id="usernameField" promptText="Usuario"
+        <TextField fx:id="usernameField" promptText="Usuario"
+                   style="-fx-background-radius: 12; -fx-padding: 10;"/>
+
+        <PasswordField fx:id="passwordField" promptText="Contraseña"
                        style="-fx-background-radius: 12; -fx-padding: 10;"/>
 
-            <PasswordField fx:id="passwordField" promptText="Contraseña"
-                           style="-fx-background-radius: 12; -fx-padding: 10;"/>
+        <PasswordField fx:id="confirmPasswordField" promptText="Confirmar contraseña"
+                       style="-fx-background-radius: 12; -fx-padding: 10;"/>
 
-            <PasswordField fx:id="confirmPasswordField" promptText="Confirmar contraseña"
-                           style="-fx-background-radius: 12; -fx-padding: 10;"/>
+        <Button fx:id="registerButton" text="Registrarse"
+                onAction="#onRegister"
+                style="-fx-background-color: #8E7CC3; -fx-text-fill: white; -fx-background-radius: 12; -fx-font-weight: bold;"
+                prefWidth="220"/>
 
-            <Button fx:id="registerButton" text="Registrarse"
-                    onAction="#onRegister"
-                    style="-fx-background-color: #8E7CC3; -fx-text-fill: white;
-                           -fx-background-radius: 12; -fx-font-weight: bold;"
-                    prefWidth="220"/>
+        <Label fx:id="messageLabel" style="-fx-text-fill: #FCDDEC; -fx-font-size: 13px;"/>
 
-            <Label fx:id="messageLabel"
-                   style="-fx-text-fill: #FCDDEC; -fx-font-size: 13px;"/>
+        <Hyperlink fx:id="backToLogin" text="Volver al inicio"
+                   onAction="#onBackToLogin"
+                   style="-fx-text-fill: #D8C5FF;"/>
 
-            <Hyperlink fx:id="backToLogin" text="Volver al inicio"
-                       onAction="#onBackToLogin"
-                       style="-fx-text-fill: #D8C5FF;"/>
-
-        </VBox>
-    </children>
+    </VBox>
 
 </AnchorPane>

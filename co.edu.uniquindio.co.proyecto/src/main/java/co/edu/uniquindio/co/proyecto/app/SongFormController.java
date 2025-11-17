@@ -2,7 +2,8 @@ package co.edu.uniquindio.co.proyecto.app;
 
 import co.edu.uniquindio.co.proyecto.model.Cancion;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 public class SongFormController {
@@ -14,45 +15,66 @@ public class SongFormController {
     @FXML private TextField txtAnio;
     @FXML private TextField txtDuracion;
 
-    private Cancion cancionEdicion; // null si es nueva
+    private Cancion editSong;
 
-    @FXML
-    private void onGuardar() {
-        try {
-            String id = txtId.getText();
-            String titulo = txtTitulo.getText();
-            String artista = txtArtista.getText();
-            String genero = txtGenero.getText();
-            int anio = Integer.parseInt(txtAnio.getText());
-            int duracion = Integer.parseInt(txtDuracion.getText());
-
-            Cancion c = new Cancion(id, titulo, artista, genero, anio, duracion);
-
-            if (cancionEdicion == null) {
-                AppContext.get().songCatalog.add(c);
-            } else {
-                AppContext.get().songCatalog.update(c);
-            }
-
-            ((Stage) txtId.getScene().getWindow()).close();
-
-        } catch (Exception e) {
-            new Alert(Alert.AlertType.ERROR, "Datos inválidos").show();
-        }
-    }
-
-    @FXML
-    private void onCancelar() {
-        ((Stage) txtId.getScene().getWindow()).close();
-    }
+    private final AppContext ctx = AppContext.get();
 
     public void cargarCancion(Cancion c) {
-        cancionEdicion = c;
+        editSong = c;
+
         txtId.setText(c.getId());
+        txtId.setDisable(true);
+
         txtTitulo.setText(c.getTitulo());
         txtArtista.setText(c.getArtista());
         txtGenero.setText(c.getGenero());
         txtAnio.setText(String.valueOf(c.getAnio()));
         txtDuracion.setText(String.valueOf(c.getDuracionSegundos()));
+    }
+
+    @FXML
+    private void onGuardar() {
+        try {
+            String id = txtId.getText().trim();
+            String titulo = txtTitulo.getText().trim();
+            String artista = txtArtista.getText().trim();
+            String genero = txtGenero.getText().trim();
+            int anio = Integer.parseInt(txtAnio.getText().trim());
+            int duracion = Integer.parseInt(txtDuracion.getText().trim());
+
+            if (editSong == null) {
+                // Crear nueva
+                Cancion nueva = new Cancion(id, titulo, artista, genero, anio, duracion);
+                if (!ctx.songCatalog.add(nueva)) {
+                    showError("Ya existe una canción con ese ID");
+                    return;
+                }
+            } else {
+                // Editar existente
+                Cancion actualizada = new Cancion(id, titulo, artista, genero, anio, duracion);
+                ctx.songCatalog.update(actualizada);
+            }
+
+            ctx.data.saveAll(ctx.songCatalog, ctx.userRepo); // persistencia
+
+            closeWindow();
+
+        } catch (Exception e) {
+            showError("Error: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onCancelar() {
+        closeWindow();
+    }
+
+    private void closeWindow() {
+        Stage stage = (Stage) txtId.getScene().getWindow();
+        stage.close();
+    }
+
+    private void showError(String msg) {
+        new Alert(Alert.AlertType.ERROR, msg).showAndWait();
     }
 }

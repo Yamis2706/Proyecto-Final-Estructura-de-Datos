@@ -59,7 +59,7 @@
           <TableColumn fx:id="colArtista" text="Artista" prefWidth="160"/>
           <TableColumn fx:id="colGenero" text="Género" prefWidth="120"/>
           <TableColumn fx:id="colAnio" text="Año" prefWidth="80"/>
-          <TableColumn fx:id="colDuracion" text="Duración (seg)" prefWidth="120"/>
+          <TableColumn fx:id="colDuracion" text="Duración (s)" prefWidth="120"/>
         </columns>
       </TableView>
 
@@ -67,4 +67,3 @@
   </center>
 
 </BorderPane>
-

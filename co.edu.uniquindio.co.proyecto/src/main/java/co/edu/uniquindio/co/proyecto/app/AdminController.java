@@ -5,11 +5,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.util.Optional;
+import java.io.IOException;
+import java.util.Objects;
 
 public class AdminController {
 
@@ -19,111 +24,80 @@ public class AdminController {
     @FXML private TableColumn<Cancion, String> colArtista;
     @FXML private TableColumn<Cancion, String> colGenero;
     @FXML private TableColumn<Cancion, Integer> colAnio;
-    @FXML private TableColumn<Cancion, Integer> colDuracion;
+    @FXML private TableColumn<Cancion, Integer> colDuracion; // asegúrate de agregar esta columna en el FXML
 
-
-    // campos para edición/registro (opcional si los integras en una ventana modal)
+    // Campos opcionales en la vista (si los tienes)
     @FXML private TextField txtId;
     @FXML private TextField txtTitulo;
     @FXML private TextField txtArtista;
     @FXML private TextField txtGenero;
     @FXML private TextField txtAnio;
-    @FXML private TextField txtDuracion;
-
+    @FXML private TextField txtDuracionField;
 
     private final AppContext ctx = AppContext.get();
 
     @FXML
     public void initialize() {
-        // defensivo: puede que alguna vista no tenga la tabla (evita NPEs)
-        if (colId != null)    colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        if (colTitulo != null)colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
+        if (colId != null)     colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        if (colTitulo != null) colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         if (colArtista != null)colArtista.setCellValueFactory(new PropertyValueFactory<>("artista"));
-        if (colGenero != null)colGenero.setCellValueFactory(new PropertyValueFactory<>("genero"));
+        if (colGenero != null) colGenero.setCellValueFactory(new PropertyValueFactory<>("genero"));
         if (colAnio != null)   colAnio.setCellValueFactory(new PropertyValueFactory<>("anio"));
-        if (colAnio != null)   colDuracion.setCellValueFactory(new PropertyValueFactory<>("duracionSegundos"));
+        if (colDuracion != null) colDuracion.setCellValueFactory(new PropertyValueFactory<>("duracionSegundos"));
 
-
-
+        refrescarTabla();
 
         if (songTable != null) {
-            refrescarTabla();
-
-            // cuando seleccionen una fila, cargar datos en campos (si existen)
             songTable.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
                 if (sel != null) cargarSeleccion(sel);
             });
         }
     }
 
-    // ----------------- Acciones de los botones -----------------
+    // ----------------- Acciones -----------------
 
     @FXML
     private void onRegisterSong(ActionEvent evt) {
         try {
-            String id = safeGet(txtId);
-            String titulo = safeGet(txtTitulo);
-            String artista = safeGet(txtArtista);
-            String genero = safeGet(txtGenero);
-            int anio = parseOrThrow(txtAnio, "Año inválido");
-
-            if (id.isBlank()) { showError("ID no puede estar vacío"); return; }
-
-            Cancion c = new Cancion(id, titulo, artista, genero, anio, 0);
-            boolean added = ctx.songCatalog.add(c);
-            if (added) {
-                ctx.indexTitles(ctx.songCatalog.list()); // opcional: mantener trie actualizado
-                // si AppContext tiene persistencia centralizada, usa su método; si no, guarda aquí
-                // ejemplo: AppContext.get().addSong(c);
-                refrescarTabla();
-                limpiarCampos();
-                new Alert(Alert.AlertType.INFORMATION, "Canción agregada").showAndWait();
-            } else {
-                showError("ID ya existe");
-            }
-        } catch (Exception ex) {
-            showError("Error agregando canción: " + ex.getMessage());
+            openSongFormModal(null); // null => crear nueva
+            refrescarTabla();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("No se pudo abrir el formulario de canción: " + e.getMessage());
         }
     }
 
     @FXML
     private void onEditSong(ActionEvent evt) {
+        Cancion selected = songTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showError("Seleccione una canción para editar");
+            return;
+        }
         try {
-            Cancion selected = songTable.getSelectionModel().getSelectedItem();
-            if (selected == null) { showError("Seleccione una canción de la lista"); return; }
-
-            String id = selected.getId(); // no permitir cambiar id desde aquí
-            String titulo = safeGet(txtTitulo);
-            String artista = safeGet(txtArtista);
-            String genero = safeGet(txtGenero);
-            int anio = parseOrThrow(txtAnio, "Año inválido");
-
-            Cancion updated = new Cancion(id, titulo, artista, genero, anio, selected.getDuracionSegundos());
-            boolean ok = ctx.songCatalog.update(updated);
-            if (ok) {
-                ctx.indexTitles(ctx.songCatalog.list());
-                refrescarTabla();
-                limpiarCampos();
-                new Alert(Alert.AlertType.INFORMATION, "Canción actualizada").showAndWait();
-            } else {
-                showError("No se pudo actualizar (ID no existe)");
-            }
-        } catch (Exception ex) {
-            showError("Error actualizando: " + ex.getMessage());
+            openSongFormModal(selected); // pasar para edición
+            refrescarTabla();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("No se pudo abrir el formulario de edición: " + e.getMessage());
         }
     }
 
     @FXML
     private void onDeleteSong(ActionEvent evt) {
         Cancion selected = songTable.getSelectionModel().getSelectedItem();
-        if (selected == null) { showError("Seleccione una canción"); return; }
+        if (selected == null) {
+            showError("Seleccione una canción para eliminar");
+            return;
+        }
         boolean removed = ctx.songCatalog.remove(selected.getId());
         if (removed) {
+            // persistir si tienes DataManager desde AppContext (ajusta si tu AppContext ofrece método)
+            // AppContext.get().saveStateIfNeeded();
             refrescarTabla();
-            limpiarCampos();
             new Alert(Alert.AlertType.INFORMATION, "Canción eliminada").showAndWait();
         } else {
-            showError("No se pudo eliminar (ID no existe)");
+            showError("No se pudo eliminar la canción");
         }
     }
 
@@ -131,12 +105,39 @@ public class AdminController {
     private void onLogout(ActionEvent evt) {
         try {
             Stage stage = (Stage) songTable.getScene().getWindow();
-            // usa el ViewLoader que definimos (carga y setea escena)
             ViewLoader.load(stage, "login-view.fxml", "SyncUp - Login");
         } catch (Exception e) {
             e.printStackTrace();
-            new Alert(Alert.AlertType.ERROR, "No se pudo regresar al login").showAndWait();
+            showError("No se pudo regresar al login");
         }
+    }
+
+    // ----------------- Modal form opener -----------------
+
+    /**
+     * Abre el formulario song-form.fxml en modal. Si 'edit' es no nulo, el formulario cargará la canción.
+     */
+    private void openSongFormModal(Cancion edit) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("song-form.fxml"));
+        Parent root = loader.load();
+
+        // obtener el controlador y pasar la canción si es edición
+        Object controller = loader.getController();
+        if (edit != null) {
+            if (controller instanceof co.edu.uniquindio.co.proyecto.app.SongFormController) {
+                ((co.edu.uniquindio.co.proyecto.app.SongFormController) controller).cargarCancion(edit);
+            } else {
+                // por seguridad: si el controlador no es el esperado, lanzamos
+                throw new IllegalStateException("Controller de song-form no es SongFormController");
+            }
+        }
+
+        Stage modal = new Stage();
+        modal.initOwner(songTable != null ? songTable.getScene().getWindow() : null);
+        modal.initModality(Modality.APPLICATION_MODAL);
+        modal.setTitle(edit == null ? "Registrar Canción" : "Editar Canción");
+        modal.setScene(new Scene(root));
+        modal.showAndWait();
     }
 
     // ----------------- Helpers -----------------
@@ -154,14 +155,7 @@ public class AdminController {
         if (txtArtista != null) txtArtista.setText(safe(c.getArtista()));
         if (txtGenero != null) txtGenero.setText(safe(c.getGenero()));
         if (txtAnio != null) txtAnio.setText(String.valueOf(c.getAnio()));
-    }
-
-    private void limpiarCampos() {
-        if (txtId != null) txtId.clear();
-        if (txtTitulo != null) txtTitulo.clear();
-        if (txtArtista != null) txtArtista.clear();
-        if (txtGenero != null) txtGenero.clear();
-        if (txtAnio != null) txtAnio.clear();
+        if (txtDuracionField != null) txtDuracionField.setText(String.valueOf(c.getDuracionSegundos()));
     }
 
     private void showError(String msg) {
@@ -171,40 +165,5 @@ public class AdminController {
     private String safe(String s) {
         return s == null ? "" : s;
     }
-
-    private String safeGet(TextField tf) {
-        return tf == null ? "" : (tf.getText() == null ? "" : tf.getText().trim());
-    }
-
-    private int parseOrThrow(TextField tf, String errMsg) {
-        String v = safeGet(tf);
-        if (v.isBlank()) return 0;
-        try {
-            return Integer.parseInt(v);
-        } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException(errMsg);
-        }
-    }
-
-    @FXML
-    private void onRegisterSong() throws Exception {
-        ViewLoader.openModal("song-form.fxml", "Registrar Canción");
-        refrescarTabla();
-    }
-
-    @FXML
-    private void onEditSong() throws Exception {
-        Cancion c = songTable.getSelectionModel().getSelectedItem();
-        if (c == null) {
-            new Alert(Alert.AlertType.WARNING, "Seleccione una canción").show();
-            return;
-        }
-
-        ViewLoader.openModal("song-form.fxml", "Editar Canción", controller -> {
-            ((SongFormController) controller).cargarCancion(c);
-        });
-
-        refrescarTabla();
-    }
-
 }
+

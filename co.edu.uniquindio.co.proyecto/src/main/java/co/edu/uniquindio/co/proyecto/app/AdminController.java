@@ -102,15 +102,16 @@ public class AdminController {
     }
 
     @FXML
-    private void onLogout(ActionEvent evt) {
+    private void onLogout() {
         try {
             Stage stage = (Stage) songTable.getScene().getWindow();
-            ViewLoader.load(stage, "login-view.fxml", "SyncUp - Login");
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("No se pudo regresar al login");
+            ViewLoader.setView(stage, "login-view.fxml", "SyncUp - Login");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "No se pudo regresar al login").showAndWait();
         }
     }
+
 
     // ----------------- Modal form opener -----------------
 

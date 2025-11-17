@@ -1,57 +1,65 @@
 package co.edu.uniquindio.co.proyecto.app;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.event.ActionEvent;
 import javafx.stage.Stage;
 
 public class LoginController {
 
-    @FXML
-    private TextField txtUsuario;
-    @FXML
-    private PasswordField txtPassword;
-    @FXML
-    private ComboBox<String> comboRol;
+    @FXML private TextField txtUsuario;
+    @FXML private PasswordField txtPassword;
+    @FXML private ComboBox<String> roleCombo;
+    @FXML private Button btnLogin;
+    @FXML private Hyperlink btnGoRegister;
+    @FXML private Label lblMensaje;
 
     @FXML
     public void initialize() {
-        comboRol.getItems().addAll("Administrador", "Usuario");
+        Platform.runLater(() -> {
+            roleCombo.getItems().addAll("Usuario", "Administrador");
+        });
     }
 
     @FXML
-    private void onLogin() {
-        String user = txtUsuario.getText().trim();
-        String pass = txtPassword.getText().trim();
-        String rol = comboRol.getValue();
+    public void onLogin(ActionEvent event) {
+        lblMensaje.setText("");
+
+        String user = txtUsuario.getText();
+        String pass = txtPassword.getText();
+        String rol  = roleCombo.getValue();
 
         if (user.isEmpty() || pass.isEmpty() || rol == null) {
-            new Alert(Alert.AlertType.WARNING, "Debe llenar todos los campos").show();
+            lblMensaje.setText("Completa todos los campos");
             return;
         }
 
+        Stage stage = (Stage) btnLogin.getScene().getWindow();
+
         try {
-            Stage stage = (Stage) txtUsuario.getScene().getWindow();
-
             if (rol.equals("Administrador")) {
-                ViewLoader.load(stage, "admin-view.fxml", "Panel Administrador");
+                ViewLoader.setView(stage, "admin-view.fxml", "Panel Administrador");
             } else {
-                ViewLoader.load(stage, "user-view.fxml", "Panel Usuario");
+                ViewLoader.setView(stage, "user-view.fxml", "Panel Usuario");
             }
-
         } catch (Exception e) {
+            lblMensaje.setText("Error cargando la vista");
             e.printStackTrace();
-            new Alert(Alert.AlertType.ERROR, "No se pudo abrir la ventana").show();
         }
     }
 
     @FXML
-    private void onGoToRegister() {
+    public void onGoToRegister(ActionEvent event) {
         try {
-            Stage stage = (Stage) txtUsuario.getScene().getWindow();
-            ViewLoader.load(stage, "register-view.fxml", "Crear Cuenta");
+            Stage stage = (Stage) btnGoRegister.getScene().getWindow();
+            ViewLoader.setView(stage, "register-view.fxml", "Registro");
         } catch (Exception e) {
-            new Alert(Alert.AlertType.ERROR, "No se pudo abrir el registro").show();
+            lblMensaje.setText("No se pudo abrir el registro");
+            e.printStackTrace();
         }
     }
 }
+
+
 

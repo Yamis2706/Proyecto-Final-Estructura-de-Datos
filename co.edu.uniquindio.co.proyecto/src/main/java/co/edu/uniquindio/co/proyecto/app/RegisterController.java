@@ -1,6 +1,5 @@
 package co.edu.uniquindio.co.proyecto.app;
 
-import co.edu.uniquindio.co.proyecto.model.Usuario;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -9,36 +8,41 @@ public class RegisterController {
 
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
-    @FXML private TextField nameField;
+    @FXML private PasswordField confirmPasswordField;
+    @FXML private Button registerButton;
+    @FXML private Hyperlink backToLogin;
     @FXML private Label messageLabel;
 
     @FXML
     public void onRegister() {
-        var ctx = AppContext.get();
+        messageLabel.setText("");
 
-        String username = usernameField.getText();
+        String user = usernameField.getText();
         String pass = passwordField.getText();
-        String name = nameField.getText();
+        String confirm = confirmPasswordField.getText();
 
-        if (username.isBlank() || pass.isBlank() || name.isBlank()) {
+        if (user.isBlank() || pass.isBlank() || confirm.isBlank()) {
             messageLabel.setText("Todos los campos son obligatorios");
             return;
         }
 
-        if (ctx.userRepository.get(username).isPresent()) {
-            messageLabel.setText("Usuario ya existe");
+        if (!pass.equals(confirm)) {
+            messageLabel.setText("Las contraseñas no coinciden");
             return;
         }
 
-        ctx.registerUser(new Usuario(username, pass, name, Usuario.Role.USER));
-
-        Stage stage = (Stage) usernameField.getScene().getWindow();
-        ViewLoader.load(stage, "login-view.fxml", "Iniciar Sesión");
+        messageLabel.setText("Usuario registrado con éxito");
     }
 
     @FXML
-    public void onGoBack() {
-        Stage stage = (Stage) usernameField.getScene().getWindow();
-        ViewLoader.load(stage, "login-view.fxml", "Iniciar Sesión");
+    public void onBackToLogin() {
+        try {
+            Stage stage = (Stage) registerButton.getScene().getWindow();
+            ViewLoader.setView(stage, "login-view.fxml", "SyncUp - Login");
+        } catch (Exception e) {
+            messageLabel.setText("No se pudo volver al login");
+        }
     }
 }
+
+

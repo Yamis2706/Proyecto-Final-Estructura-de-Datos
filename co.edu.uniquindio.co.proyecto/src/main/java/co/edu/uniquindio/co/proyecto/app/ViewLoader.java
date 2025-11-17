@@ -7,27 +7,28 @@ import javafx.stage.Stage;
 
 public class ViewLoader {
 
-    public static void load(Stage stage, String fxml, String title) {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    ViewLoader.class.getResource(fxml)
-            );
+    public static Parent load(String fxml) throws Exception {
+        return FXMLLoader.load(ViewLoader.class.getResource(fxml));
+    }
 
-            if (loader.getLocation() == null) {
-                throw new IllegalStateException("FXML no encontrado: " + fxml);
+    public static void setView(Stage stage, String fxml, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(ViewLoader.class.getResource(fxml));
+            Parent root = loader.load();
+
+            if (stage.getScene() == null) {
+                stage.setScene(new Scene(root));
+            } else {
+                stage.getScene().setRoot(root);
             }
 
-            Parent root = loader.load();
-            stage.setScene(new Scene(root));
             stage.setTitle(title);
             stage.show();
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("No se pudo abrir la ventana: " + fxml + "\n" + e.getMessage());
+            throw new RuntimeException("No se pudo cargar la vista: " + fxml, e);
         }
     }
-
-    public static void openModal(String s, String registrarCanción) {
-    }
 }
+

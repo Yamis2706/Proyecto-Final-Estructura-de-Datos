@@ -9,7 +9,7 @@ import java.util.*;
 public class DataManager {
 
     private static final String USERS_FILE = "users.csv";
-    private static final String SONGS_FILE = "songs.csv";
+    private static final String SONGS_FILE = "C:\\Users\\DELL\\Documents\\Estructura de Datos\\Proyecto-Final-Estructura-de-Datos\\co.edu.uniquindio.co.proyecto\\songs.csv";
 
     // -------------------------------------------------------------------------
     //   USUARIOS
@@ -58,7 +58,6 @@ public class DataManager {
             for (Usuario u : users.values()) {
                 pw.println(u.getUsername() + ";" +
                         u.getPassword() + ";" +
-                        u.getNombre() + ";" +
                         u.getRole());
             }
 
@@ -103,8 +102,9 @@ public class DataManager {
     }
 
     public static void saveSongs(List<Cancion> songs) {
-        try (PrintWriter pw = new PrintWriter(new FileWriter(SONGS_FILE))) {
+        File file = new File("songs.txt"); // GUARDA EN RAÍZ DE PROYECTO
 
+        try (PrintWriter pw = new PrintWriter(new FileWriter(file))) {
             for (Cancion c : songs) {
                 pw.println(
                         c.getId() + ";" +
@@ -115,7 +115,7 @@ public class DataManager {
                                 c.getDuracionSegundos()
                 );
             }
-
+            System.out.println("Canciones guardadas en: " + file.getAbsolutePath());
         } catch (Exception e) {
             e.printStackTrace();
         }

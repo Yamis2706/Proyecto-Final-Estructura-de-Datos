@@ -6,11 +6,8 @@ import co.edu.uniquindio.co.proyecto.service.SearchService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,8 +37,8 @@ public class UserController {
     public void initialize() {
         logicChoice.getItems().setAll(SearchService.Logic.AND, SearchService.Logic.OR);
         logicChoice.getSelectionModel().select(SearchService.Logic.OR);
-
-        // ya no usamos demo hardcode; el usuario real se asigna desde LoginController vía setCurrentUser()
+        // usuario actual: usar demo si existe
+        currentUser = ctx.userRepository.get("demo").orElse(null);
 
         searchTitleField.textProperty().addListener((obs, old, val) -> {
             List<String> words = ctx.trie.buscarPorPrefijo(val == null ? "" : val);
@@ -54,17 +51,6 @@ public class UserController {
                 onTextSearch();
             }
         });
-    }
-
-    /**
-     * Método para que LoginController pase el usuario autenticado.
-     */
-    public void setCurrentUser(Usuario u) {
-        this.currentUser = u;
-        // cargar favoritos inmediatamente si la UI ya está inicializada
-        if (favoritosList != null && currentUser != null) {
-            favoritosList.setItems(FXCollections.observableArrayList(currentUser.getListaFavoritos().stream().map(Cancion::getTitulo).toList()));
-        }
     }
 
     @FXML
@@ -127,25 +113,4 @@ public class UserController {
         ctx.csvService.writeToFile(currentUser.getListaFavoritos(), Path.of(target.getAbsolutePath()));
         new Alert(Alert.AlertType.INFORMATION, "Favoritos exportados").showAndWait();
     }
-
-    @FXML
-    public void onGoPerfil() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/user_profile.fxml"));
-            Scene scene = new Scene(loader.load());
-
-            ProfileController controller = loader.getController();
-            controller.setUser(currentUser); // ⚠ Asegúrate de tener currentUser en tu UserController
-
-            Stage stage = new Stage();
-            stage.setTitle("Perfil de Usuario");
-            stage.setScene(scene);
-            stage.show();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            new Alert(Alert.AlertType.ERROR, "No se pudo abrir el perfil").showAndWait();
-        }
-    }
-
 }

@@ -1,73 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.geometry.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="co.edu.uniquindio.co.proyecto.app.UserController"
-            prefWidth="900" prefHeight="640"
-            style="-fx-background-color: #F7F4FF;">
-
-  <!-- ██████████████████████████████████████
-       LATERAL IZQUIERDO (MENU)
-  ███████████████████████████████████████ -->
+<BorderPane style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.co.proyecto.app.UserController">
+  <top>
+    <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10; -fx-background-color: #2E2A62;">
+      <Label text="Artista" textFill="#d0c0ff">
+        <font>
+          <Font name="System Bold" size="12.0" />
+        </font></Label>
+      <TextField fx:id="artistaField" prefWidth="140" promptText="Taylor Swift" style="-fx-border-color: #d0c0ff; -fx-background-radius: 10; -fx-border-radius: 10;" />
+      <Label text="Género" textFill="#d0c0ff">
+        <font>
+          <Font name="System Bold" size="12.0" />
+        </font></Label>
+      <TextField fx:id="generoField" prefWidth="120" promptText="Pop" style="-fx-border-color: #d0c0ff; -fx-background-radius: 10; -fx-border-radius: 10;" />
+      <Label text="Año" textFill="#d0c0ff">
+        <font>
+          <Font name="System Bold" size="12.0" />
+        </font></Label>
+      <TextField fx:id="anioField" prefWidth="80" promptText="2020" style="-fx-border-color: #d0c0ff; -fx-background-radius: 10; -fx-border-radius: 10;" />
+      <ChoiceBox fx:id="logicChoice" style="-fx-border-color: #d0c0ff; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: #FFFFFF;" />
+      <Button onAction="#onAdvancedSearch" style="-fx-background-color: #e6deff; -fx-background-radius: 10; -fx-border-radius: 10;" text="Buscar" textFill="#6a4dc3" />
+      <Button fx:id="discoveryButton" onAction="#onDiscovery" style="-fx-background-color: #e6deff; -fx-background-radius: 10; -fx-border-radius: 10;" text="Descubrimiento" textFill="#6a4dc3" />
+    </HBox>
+  </top>
   <left>
-    <VBox spacing="20" prefWidth="220" alignment="TOP_CENTER"
-          style="-fx-background-color: #2E2A62; -fx-padding: 25 10 25 10;">
-
-      <Label text="SyncUp"
-             style="-fx-font-size: 32px; -fx-text-fill: white; -fx-font-weight: bold;" />
-
-      <Button text="🎵  Catálogo"
-              onAction="#onShowCatalog"
-              style="-fx-background-color: transparent; -fx-text-fill: #CFC3FF; -fx-font-size: 16px;" />
-
-      <Button text="⭐  Favoritos"
-              onAction="#onShowFavorites"
-              style="-fx-background-color: transparent; -fx-text-fill: #CFC3FF; -fx-font-size: 16px;" />
-
-      <Button text="🔍  Buscar"
-              onAction="#onSearchSongs"
-              style="-fx-background-color: transparent; -fx-text-fill: #CFC3FF; -fx-font-size: 16px;" />
-
-      <Button text="🚪  Cerrar sesión"
-              onAction="#onLogout"
-              style="-fx-background-color: #8E7CC3; -fx-text-fill: white; -fx-background-radius: 12; -fx-padding: 10;" />
-
+    <VBox alignment="TOP_CENTER" spacing="6" style="-fx-padding: 10; -fx-background-color: #2E2A62;">
+      <Label text="Título" textFill="WHITE">
+        <font>
+          <Font name="System Bold" size="14.0" />
+        </font></Label>
+      <TextField fx:id="searchTitleField" promptText="Escribe para autocompletar o buscar" style="-fx-border-color: #d0c0ff; -fx-background-color: #FFFFFF; -fx-background-radius: 10; -fx-border-radius: 10;" />
+      <Button fx:id="textSearchButton" alignment="CENTER" contentDisplay="CENTER" onAction="#onTextSearch" prefHeight="25.0" prefWidth="223.0" style="-fx-background-color: #e6deff; -fx-background-radius: 10; -fx-border-radius: 10;" text="🔍 por texto" textFill="#6a4dc3" />
+      <ListView fx:id="autocompleteList" prefHeight="200" prefWidth="223.0" style="-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: #d0c0ff;" />
+      <Button fx:id="irPerfil" alignment="CENTER" contentDisplay="CENTER" onAction="#onTextSearch" prefHeight="25.0" prefWidth="223.0" style="-fx-background-color: #e6deff; -fx-background-radius: 10; -fx-border-radius: 10;" text="👤 Ir al Perfil" textFill="#6a4dc3" />
+      <AnchorPane prefHeight="56.0" prefWidth="223.0">
+        <children>
+          <Button fx:id="cerrarSesion" alignment="CENTER" contentDisplay="CENTER" layoutX="58.0" layoutY="55.0" onAction="#onTextSearch" prefHeight="25.0" prefWidth="108.0" style="-fx-background-color: #e6deff; -fx-background-radius: 10; -fx-border-radius: 10;" text="⬅ Cerrar Sesión" textFill="#6a4dc3" />
+        </children>
+      </AnchorPane>
     </VBox>
   </left>
-
-  <!-- ██████████████████████████████████████
-       PANEL PRINCIPAL
-  ███████████████████████████████████████ -->
   <center>
-    <VBox spacing="16" alignment="TOP_CENTER"
-          style="-fx-padding: 20;">
-
-      <TextField fx:id="searchField"
-                 promptText="Buscar canción por título o artista"
-                 style="-fx-background-radius: 12; -fx-padding: 10; -fx-background-color: #FFFFFF;"
-                 prefWidth="600"/>
-
-      <Button text="Buscar"
-              onAction="#onSearch"
-              style="-fx-background-color: #8E7CC3; -fx-text-fill: white; -fx-background-radius: 12;"
-              prefWidth="200"/>
-
-      <TableView fx:id="songTable" prefHeight="500" prefWidth="750">
-        <columns>
-          <TableColumn fx:id="colId" text="ID" prefWidth="80"/>
-          <TableColumn fx:id="colTitulo" text="Título" prefWidth="220"/>
-          <TableColumn fx:id="colArtista" text="Artista" prefWidth="180"/>
-          <TableColumn fx:id="colGenero" text="Género" prefWidth="120"/>
-          <TableColumn fx:id="colAnio" text="Año" prefWidth="80"/>
-        </columns>
-      </TableView>
-
+    <VBox alignment="TOP_CENTER" spacing="6" style="-fx-padding:10;">
+      <Label text="Resultados" textFill="#6a4dc3" />
+      <ListView fx:id="resultsList" prefHeight="360" style="-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: #d0c0ff; -fx-border-color: #6A57A5;" />
+      <HBox spacing="8">
+        <Button fx:id="radioButton" onAction="#onRadioFromSelection" style="-fx-background-color: #d0c0ff;-fx-background-radius: 10; -fx-border-radius: 10;" text="Radio desde selección" textFill="#6a4dc3" />
+        <Button onAction="#onAddFavoriteFromResults" style="-fx-background-color: #d0c0ff;-fx-background-radius: 10; -fx-border-radius: 10;" text="Agregar a Favoritos" textFill="#6a4dc3" />
+      </HBox>
     </VBox>
   </center>
-
+  <right>
+    <VBox alignment="TOP_CENTER" spacing="6" style="-fx-padding:10;">
+      <Label text="Favoritos" textFill="#6a4dc3" />
+      <ListView fx:id="favoritosList" prefHeight="359.0" prefWidth="240" style="-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: #d0c0ff; -fx-border-color: #6A57A5;" />
+      <Button fx:id="exportCsvButton" onAction="#onExportCsv" style="-fx-background-color: #d0c0ff;-fx-background-radius: 10; -fx-border-radius: 10;" text="Exportar CSV" textFill="#6a4dc3" />
+    </VBox>
+  </right>
 </BorderPane>
-

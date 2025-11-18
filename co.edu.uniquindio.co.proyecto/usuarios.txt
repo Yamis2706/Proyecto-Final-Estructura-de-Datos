@@ -1,0 +1,9 @@
+592;daniel;daniel;daniel;USER
+900;taty;taty;taty;USER
+104;dani;dani;dani;USER
+203;yamis;yamis;yamis;USER
+999;admin;admin;Administrador;ADMIN
+302;fabis;fabis;fabis;USER
+368;fabian;fabian;fabian;USER
+397;emily;emily;emily;USER
+486;demo;demo;demo;USER

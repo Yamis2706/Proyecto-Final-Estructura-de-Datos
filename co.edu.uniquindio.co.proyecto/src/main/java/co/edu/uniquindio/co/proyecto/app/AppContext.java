@@ -14,11 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Contexto global de la aplicación.
- * Usa la API pública de UserRepository y SongCatalog que ya existen en tu proyecto.
- */
 public class AppContext {
+
     private static final AppContext INSTANCE = new AppContext();
     public static AppContext get() { return INSTANCE; }
 
@@ -36,38 +33,61 @@ public class AppContext {
     public final BulkImportService bulkImportService = new BulkImportService();
 
     private AppContext() {
-        // Cargar usuarios desde disco: DataManager.loadUsers() devuelve Map<String, Usuario>
+
+        // Cargar usuarios desde disco
         try {
             Map<String, Usuario> loadedUsers = DataManager.loadUsers();
             if (loadedUsers != null && !loadedUsers.isEmpty()) {
                 for (Usuario u : loadedUsers.values()) {
-                    userRepository.add(u); // usa el método público add
+                    userRepository.add(u);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Cargar canciones desde disco: DataManager.loadSongs() devuelve List<Cancion>
+        // Crear administrador si no existe
+        boolean adminExiste = userRepository.list().stream()
+                .anyMatch(u -> u.getUsername().equals("admin"));
+
+        if (!adminExiste) {
+            Usuario admin = new Usuario(
+                    "999", // ID fijo o generarIdUnicoDeTresDigitos()
+                    "admin",
+                    "admin",
+                    "Administrador",
+                    Usuario.Role.ADMIN
+            );
+            userRepository.add(admin);
+
+            // Persistir archivo
+            Map<String, Usuario> map = new HashMap<>();
+            for (Usuario u : userRepository.list()) map.put(u.getUsername(), u);
+            DataManager.saveUsers(map);
+        }
+
+        /*for (Usuario u : userRepository.list()) {
+            System.out.println("Usuario cargado: " + u.getUsername() + " | Role: " + u.getRole());
+        }
+
+         */
+
+
+        // Cargar canciones desde disco
         try {
             List<Cancion> loadedSongs = DataManager.loadSongs();
             if (loadedSongs != null && !loadedSongs.isEmpty()) {
                 for (Cancion c : loadedSongs) {
-                    songCatalog.add(c); // add() ya existe en SongCatalog
-                    grafoDeSimilitud.agregarCancion(c); // registra nodo en grafo
+                    songCatalog.add(c);
+                    grafoDeSimilitud.agregarCancion(c);
                 }
-                indexTitles(loadedSongs); // indexar títulos en trie
+                indexTitles(loadedSongs);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // Nota: si guardas aristas del grafo, reconstruirlas aquí
     }
 
-    /**
-     * Indexa una lista de canciones en el trie (autocompletado).
-     */
     public void indexTitles(List<Cancion> canciones) {
         if (canciones == null) return;
         for (Cancion c : canciones) {
@@ -77,14 +97,9 @@ public class AppContext {
 
     // ---------------- Usuarios ----------------
 
-    /**
-     * Registra un usuario y persiste todos los usuarios en disco.
-     * @return true si se agregó correctamente (username único).
-     */
     public boolean registerUser(Usuario u) {
         boolean ok = userRepository.add(u);
         if (ok) {
-            // construir mapa desde el repositorio y guardarlo
             Map<String, Usuario> map = new HashMap<>();
             for (Usuario item : userRepository.list()) map.put(item.getUsername(), item);
             DataManager.saveUsers(map);
@@ -94,37 +109,27 @@ public class AppContext {
 
     // ---------------- Canciones ----------------
 
-    /**
-     * Agrega una canción al catálogo y persiste el catálogo.
-     * Lanzará IllegalArgumentException si el id ya existe (songCatalog.add lo maneja).
-     */
     public void addSong(Cancion c) {
         boolean added = songCatalog.add(c);
         if (!added) throw new IllegalArgumentException("ID existente: " + c.getId());
-        // indexar y registrar en grafo
+
         if (c.getTitulo() != null) trie.insertar(c.getTitulo());
         grafoDeSimilitud.agregarCancion(c);
         DataManager.saveSongs(songCatalog.list());
     }
 
-    /**
-     * Actualiza una canción en el catálogo y persiste.
-     * Lanzará IllegalArgumentException si el id no existe.
-     */
     public void updateSong(Cancion c) {
         boolean updated = songCatalog.update(c);
         if (!updated) throw new IllegalArgumentException("ID no existe: " + c.getId());
+
         if (c.getTitulo() != null) trie.insertar(c.getTitulo());
         DataManager.saveSongs(songCatalog.list());
     }
 
-    /**
-     * Elimina una canción por id y persiste.
-     */
     public void deleteSong(String id) {
         boolean removed = songCatalog.remove(id);
         if (!removed) throw new IllegalArgumentException("ID no existe: " + id);
-        // Nota: si quieres eliminar del trie o del grafo, hazlo aquí.
+
         DataManager.saveSongs(songCatalog.list());
     }
 }

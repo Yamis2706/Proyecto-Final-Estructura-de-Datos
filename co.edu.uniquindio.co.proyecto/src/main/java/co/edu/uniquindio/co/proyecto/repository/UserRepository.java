@@ -6,55 +6,37 @@ import java.util.*;
 
 public class UserRepository {
 
-    // 🌟 ESTE es tu mapa real (corrige tu error del "map" inexistente)
-    private final Map<String, Usuario> usernameToUser = new HashMap<>();
+    private final Map<String, Usuario> usuarios = new HashMap<>();
 
-    // ----------------------- CRUD -----------------------
-
-    public boolean add(Usuario usuario) {
-        if (usuario == null || usuario.getUsername() == null) return false;
-        return usernameToUser.putIfAbsent(usuario.getUsername(), usuario) == null;
+    // Agregar usuario
+    public boolean add(Usuario u) {
+        if (usuarios.containsKey(u.getUsername())) return false;
+        usuarios.put(u.getUsername(), u);
+        return true;
     }
 
+    // Obtener usuario por username
     public Optional<Usuario> get(String username) {
-        return Optional.ofNullable(usernameToUser.get(username));
+        return Optional.ofNullable(usuarios.get(username));
     }
 
-    public boolean contains(String username) {
-        return usernameToUser.containsKey(username);
-    }
-
+    // Eliminar usuario por username
     public boolean remove(String username) {
-        return usernameToUser.remove(username) != null;
+        return usuarios.remove(username) != null;
     }
 
-    public Collection<Usuario> list() {
-        return usernameToUser.values();
+    // Listar todos los usuarios como List
+    public List<Usuario> list() {
+        return new ArrayList<>(usuarios.values());
     }
 
+    // Retornar mapa completo (opcional)
+    public Map<String, Usuario> getAllUsers() {
+        return usuarios;
+    }
+
+    // Retornar cantidad de usuarios
     public int size() {
-        return usernameToUser.size();
-    }
-
-    // ------------------ Utilidades ------------------
-
-    /** Retorna copia del mapa (para DataManager). */
-    public Map<String, Usuario> asMap() {
-        return new HashMap<>(usernameToUser);
-    }
-
-    /** Lista de usuarios (copia). */
-    public List<Usuario> getAll() {
-        return new ArrayList<>(usernameToUser.values());
-    }
-
-    /** Elimina por username. */
-    public void delete(String username) {
-        usernameToUser.remove(username);
-    }
-
-    /** Persiste en users.txt */
-    public void persist() {
-        DataManager.saveUsers(usernameToUser);
+        return usuarios.size();
     }
 }

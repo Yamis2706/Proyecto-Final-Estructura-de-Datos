@@ -2,18 +2,19 @@ package co.edu.uniquindio.co.proyecto.app;
 
 import co.edu.uniquindio.co.proyecto.model.Cancion;
 import co.edu.uniquindio.co.proyecto.model.Usuario;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.stage.Modality;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.converter.IntegerStringConverter;
+
+import java.util.*;
 
 public class AdminController {
 
-    // ---------------- TABLA CANCIONES ----------------
     @FXML private TableView<Cancion> songTable;
     @FXML private TableColumn<Cancion, String> colId;
     @FXML private TableColumn<Cancion, String> colTitulo;
@@ -22,139 +23,236 @@ public class AdminController {
     @FXML private TableColumn<Cancion, Integer> colAnio;
     @FXML private TableColumn<Cancion, Integer> colDuracion;
 
-    // ---------------- TABLA USUARIOS ----------------
-    @FXML private TableView<Usuario> songTable1;
-    @FXML private TableColumn<Usuario, String> colId1;
-    @FXML private TableColumn<Usuario, String> colTitulo1;
-    @FXML private TableColumn<Usuario, String> colArtista1;
-    @FXML private TableColumn<Usuario, String> colGenero1;
-    @FXML private TableColumn<Usuario, String> colAnio1;
-    @FXML private TableColumn<Usuario, String> colDuracion1;
+    @FXML private TableView<Usuario> userTable;
+    @FXML private TableColumn<Usuario, String> colUserId;
+    @FXML private TableColumn<Usuario, String> colUserUsername;
+    @FXML private TableColumn<Usuario, String> colUserPassword;
+    @FXML private TableColumn<Usuario, String> colUserRole;
 
     private final AppContext ctx = AppContext.get();
 
     @FXML
     public void initialize() {
+        songTable.setEditable(true);
 
-        // ---------------------- CANCIONES -------------------------
-        colId.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getId()));
-        colTitulo.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getTitulo()));
-        colArtista.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getArtista()));
-        colGenero.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getGenero()));
-        colAnio.setCellValueFactory(f -> new SimpleObjectProperty<>(f.getValue().getAnio()));
-        colDuracion.setCellValueFactory(f -> new SimpleObjectProperty<>(f.getValue().getDuracionSegundos()));
+        // Configurar columnas de canciones
+        colId.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getId()));
+        colId.setCellFactory(TextFieldTableCell.forTableColumn());
 
-        cargarTablaCanciones();
+        colTitulo.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getTitulo()));
+        colTitulo.setCellFactory(TextFieldTableCell.forTableColumn());
+        colTitulo.setOnEditCommit(event -> {
+            Cancion c = event.getRowValue();
+            c.setTitulo(event.getNewValue());
+            ctx.updateSong(c);
+        });
 
-        // ---------------------- USUARIOS -------------------------
-        colId1.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getUsername()));   // ID → username
-        colTitulo1.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getNombre())); // Nombre
-        colArtista1.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getRole().name())); // Rol
-        colGenero1.setCellValueFactory(f -> new SimpleStringProperty("")); // vacío
-        colAnio1.setCellValueFactory(f -> new SimpleStringProperty("")); // vacío
-        colDuracion1.setCellValueFactory(f -> new SimpleStringProperty("")); // vacío
+        colArtista.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getArtista()));
+        colArtista.setCellFactory(TextFieldTableCell.forTableColumn());
+        colArtista.setOnEditCommit(event -> {
+            Cancion c = event.getRowValue();
+            c.setArtista(event.getNewValue());
+            ctx.updateSong(c);
+        });
 
-        cargarTablaUsuarios();
+        colGenero.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getGenero()));
+        colGenero.setCellFactory(TextFieldTableCell.forTableColumn());
+        colGenero.setOnEditCommit(event -> {
+            Cancion c = event.getRowValue();
+            c.setGenero(event.getNewValue());
+            ctx.updateSong(c);
+        });
+
+        colAnio.setCellValueFactory(cell -> new SimpleIntegerProperty(cell.getValue().getAnio()).asObject());
+        colAnio.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        colAnio.setOnEditCommit(event -> {
+            Cancion c = event.getRowValue();
+            c.setAnio(event.getNewValue());
+            ctx.updateSong(c);
+        });
+
+        colDuracion.setCellValueFactory(cell -> new SimpleIntegerProperty(cell.getValue().getDuracionSegundos()).asObject());
+        colDuracion.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        colDuracion.setOnEditCommit(event -> {
+            Cancion c = event.getRowValue();
+            c.setDuracionSegundos(event.getNewValue());
+            ctx.updateSong(c);
+        });
+
+        // Configurar columnas de usuarios
+        colUserId.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getId()));
+        colUserUsername.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getUsername()));
+        colUserPassword.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getPassword()));
+        colUserRole.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getRole().toString()));
+        userTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+        // Cargar todas las canciones y usuarios al iniciar
+        refreshTables();
     }
 
-    // =====================================================
-    // ================ CARGAR TABLAS ======================
-    // =====================================================
+    private void refreshTables() {
+        List<Cancion> canciones = ctx.songCatalog.list();
+        songTable.getItems().setAll(canciones);
 
-    private void cargarTablaCanciones() {
-        songTable.getItems().setAll(ctx.songCatalog.list());
+        List<Usuario> usuarios = ctx.userRepository.list();
+        userTable.getItems().setAll(usuarios);
     }
-
-    private void cargarTablaUsuarios() {
-        songTable1.getItems().setAll(ctx.userRepository.getAll());
-    }
-
-    // =====================================================
-    // ================ BOTONES CANCIONES ===================
-    // =====================================================
 
     @FXML
-    private void onRegisterSong() {
-        abrirFormularioCancion(null);
+    public void onRegisterSong() {
+        Dialog<Cancion> dialog = new Dialog<>();
+        dialog.setTitle("Registrar nueva canción");
+
+        TextField tfId = new TextField();
+        tfId.setPromptText("ID");
+
+        TextField tfTitulo = new TextField();
+        tfTitulo.setPromptText("Título");
+
+        TextField tfArtista = new TextField();
+        tfArtista.setPromptText("Artista");
+
+        TextField tfGenero = new TextField();
+        tfGenero.setPromptText("Género");
+
+        TextField tfAnio = new TextField();
+        tfAnio.setPromptText("Año");
+
+        TextField tfDuracion = new TextField();
+        tfDuracion.setPromptText("Duración (seg)");
+
+        VBox content = new VBox(10, tfId, tfTitulo, tfArtista, tfGenero, tfAnio, tfDuracion);
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(button -> {
+            if (button == ButtonType.OK) {
+                try {
+                    return new Cancion(
+                            tfId.getText().isBlank() ? UUID.randomUUID().toString() : tfId.getText(),
+                            tfTitulo.getText(),
+                            tfArtista.getText(),
+                            tfGenero.getText(),
+                            Integer.parseInt(tfAnio.getText()),
+                            Integer.parseInt(tfDuracion.getText())
+                    );
+                } catch (NumberFormatException e) {
+                    new Alert(Alert.AlertType.ERROR, "Año y duración deben ser números").showAndWait();
+                }
+            }
+            return null;
+        });
+
+        Optional<Cancion> result = dialog.showAndWait();
+        result.ifPresent(c -> {
+            ctx.addSong(c);
+            refreshTables();
+            new Alert(Alert.AlertType.INFORMATION, "Canción registrada correctamente").showAndWait();
+        });
     }
 
     @FXML
-    private void onEditSong() {
-        Cancion seleccionada = songTable.getSelectionModel().getSelectedItem();
-        if (seleccionada == null) {
-            new Alert(Alert.AlertType.WARNING, "Selecciona una canción primero").show();
+    public void onEditSong() {
+        Cancion selected = songTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            new Alert(Alert.AlertType.WARNING, "Seleccione una canción para editar.").showAndWait();
             return;
         }
-        abrirFormularioCancion(seleccionada);
+
+        Dialog<Cancion> dialog = new Dialog<>();
+        dialog.setTitle("Editar canción");
+
+        TextField tfId = new TextField(selected.getId());
+        tfId.setPromptText("ID");
+
+        TextField tfTitulo = new TextField(selected.getTitulo());
+        tfTitulo.setPromptText("Título");
+
+        TextField tfArtista = new TextField(selected.getArtista());
+        tfArtista.setPromptText("Artista");
+
+        TextField tfGenero = new TextField(selected.getGenero());
+        tfGenero.setPromptText("Género");
+
+        TextField tfAnio = new TextField(String.valueOf(selected.getAnio()));
+        tfAnio.setPromptText("Año");
+
+        TextField tfDuracion = new TextField(String.valueOf(selected.getDuracionSegundos()));
+        tfDuracion.setPromptText("Duración (seg)");
+
+        VBox content = new VBox(10, tfId, tfTitulo, tfArtista, tfGenero, tfAnio, tfDuracion);
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(button -> {
+            if (button == ButtonType.OK) {
+                try {
+                    return new Cancion(
+                            tfId.getText(),
+                            tfTitulo.getText(),
+                            tfArtista.getText(),
+                            tfGenero.getText(),
+                            Integer.parseInt(tfAnio.getText()),
+                            Integer.parseInt(tfDuracion.getText())
+                    );
+                } catch (NumberFormatException e) {
+                    new Alert(Alert.AlertType.ERROR, "Año y duración deben ser números").showAndWait();
+                }
+            }
+            return null;
+        });
+
+        Optional<Cancion> result = dialog.showAndWait();
+        result.ifPresent(c -> {
+            ctx.deleteSong(selected.getId()); // eliminar la versión antigua
+            ctx.addSong(c); // agregar la versión editada
+            refreshTables();
+            new Alert(Alert.AlertType.INFORMATION, "Canción editada correctamente").showAndWait();
+        });
     }
 
     @FXML
-    private void onDeleteSong() {
-        Cancion seleccionada = songTable.getSelectionModel().getSelectedItem();
-        if (seleccionada == null) {
-            new Alert(Alert.AlertType.WARNING, "Selecciona una canción").show();
+    public void onDeleteSong() {
+        Cancion selected = songTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            new Alert(Alert.AlertType.WARNING, "Seleccione una canción para eliminar.").showAndWait();
             return;
         }
-
-        ctx.deleteSong(seleccionada.getId());
-        cargarTablaCanciones();
-    }
-
-    // =====================================================
-    // ================ BOTONES USUARIOS ===================
-    // =====================================================
-
-    @FXML
-    private void onListUsers() {
-        cargarTablaUsuarios();
+        ctx.deleteSong(selected.getId());
+        songTable.getItems().remove(selected);
+        new Alert(Alert.AlertType.INFORMATION, "Canción eliminada correctamente.").showAndWait();
     }
 
     @FXML
-    private void onDeleteUser() {
-        Usuario u = songTable1.getSelectionModel().getSelectedItem();
+    public void onListUsers() {
+        // Obtener lista de usuarios ordenada por ID ascendente
+        List<Usuario> usuariosOrdenados = new ArrayList<>(ctx.userRepository.list());
+        usuariosOrdenados.sort(Comparator.comparing(Usuario::getId));
 
-        if (u == null) {
-            new Alert(Alert.AlertType.WARNING, "Selecciona un usuario").show();
+        // Actualizar la tabla
+        userTable.getItems().setAll(usuariosOrdenados);
+    }
+
+
+    @FXML
+    public void onDeleteUser() {
+        Usuario selected = userTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            new Alert(Alert.AlertType.WARNING, "Seleccione un usuario para eliminar.").showAndWait();
             return;
         }
-
-        ctx.userRepository.delete(u.getUsername());
-        ctx.userRepository.persist(); // 💾 guardar cambios
-
-        cargarTablaUsuarios();
-    }
-
-    // =====================================================
-    // ================ FORMULARIO CANCIONES ===============
-    // =====================================================
-
-    private void abrirFormularioCancion(Cancion c) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("song-form.fxml"));
-            Stage modal = new Stage();
-            modal.setScene(new Scene(loader.load()));
-            modal.initModality(Modality.APPLICATION_MODAL);
-            modal.setTitle(c == null ? "Registrar Canción" : "Editar Canción");
-
-            SongFormController controller = loader.getController();
-            if (c != null) controller.cargarCancion(c);
-
-            modal.setOnHidden(e -> cargarTablaCanciones());
-            modal.show();
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            new Alert(Alert.AlertType.ERROR, "No se pudo abrir el formulario").show();
+        boolean removed = ctx.userRepository.remove(selected.getUsername());
+        if (removed) {
+            userTable.getItems().remove(selected);
+            new Alert(Alert.AlertType.INFORMATION, "Usuario eliminado correctamente.").showAndWait();
+        } else {
+            new Alert(Alert.AlertType.ERROR, "No se pudo eliminar el usuario.").showAndWait();
         }
     }
 
-    // =====================================================
-    // ================ LOGOUT =============================
-    // =====================================================
-
     @FXML
-    private void onLogout() {
+    public void onLogout() {
         Stage stage = (Stage) songTable.getScene().getWindow();
-        ViewLoader.load(stage, "login-view.fxml", "Login");
+        ViewLoader.load(stage, "/co/edu/uniquindio/co/proyecto/app/login-view.fxml", "SyncUp - Login");
     }
 }

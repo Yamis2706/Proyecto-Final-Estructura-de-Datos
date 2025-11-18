@@ -1,10 +1,12 @@
 package co.edu.uniquindio.co.proyecto.app;
 
 import co.edu.uniquindio.co.proyecto.model.Usuario;
-import co.edu.uniquindio.co.proyecto.repository.DataManager;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+
+import java.util.Map;
 
 public class RegisterController {
 
@@ -30,15 +32,17 @@ public class RegisterController {
             return;
         }
 
+        String id = generarIdUnicoDeTresDigitos();
+
         Usuario user = new Usuario(
-                java.util.UUID.randomUUID().toString(), // id único
-                username,                               // username
-                password,                               // password
-                username,                               // nombre (lo tomamos igual)
-                Usuario.Role.USER                       // rol
+                id,
+                username,
+                password,
+                username,  // nombre del usuario
+                Usuario.Role.USER
         );
 
-        boolean registrado = DataManager.registerUser(user);
+        boolean registrado = AppContext.get().registerUser(user);
 
         if (!registrado) {
             messageLabel.setText("El usuario ya existe.");
@@ -52,5 +56,23 @@ public class RegisterController {
     private void onGoBack() {
         Stage stage = (Stage) usernameField.getScene().getWindow();
         ViewLoader.load(stage, "login-view.fxml", "Iniciar Sesión");
+    }
+
+    private String generarIdUnicoDeTresDigitos() {
+
+        // Crear lista de IDs existentes como effectively final
+        var idsExistentes = AppContext.get().userRepository.list()
+                .stream()
+                .map(Usuario::getId)
+                .toList();
+
+        String id;
+
+        do {
+            int numero = (int) (Math.random() * 900) + 100;  // 100–999
+            id = String.valueOf(numero);
+        } while (idsExistentes.contains(id));
+
+        return id;
     }
 }

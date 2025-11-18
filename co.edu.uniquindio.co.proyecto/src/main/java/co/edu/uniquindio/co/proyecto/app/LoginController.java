@@ -7,8 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class LoginController {
 
@@ -27,13 +26,29 @@ public class LoginController {
 
         var ctx = AppContext.get();
 
-        // ------- Semilla de canciones solo si está vacío -------
+        // ------- Cargar canciones iniciales si el catálogo está vacío -------
         if (ctx.songCatalog.list().isEmpty()) {
             List<Cancion> demo = List.of(
                     new Cancion("1","Shine On","Pink Floyd","Rock",1975,810),
                     new Cancion("2","Billie Jean","Michael Jackson","Pop",1982,294),
                     new Cancion("3","Yellow","Coldplay","Alternative",2000,269),
-                    new Cancion("4","Clocks","Coldplay","Alternative",2002,307)
+                    new Cancion("4","Clocks","Coldplay","Alternative",2002,307),
+                    new Cancion("5","Imagine","John Lennon","Rock",1971,183),
+                    new Cancion("6","Hotel California","Eagles","Rock",1976,390),
+                    new Cancion("7","Stairway to Heaven","Led Zeppelin","Rock",1971,480),
+                    new Cancion("8","Smells Like Teen Spirit","Nirvana","Grunge",1991,301),
+                    new Cancion("9","Sweet Child O' Mine","Guns N' Roses","Rock",1987,356),
+                    new Cancion("10","Wonderwall","Oasis","Britpop",1995,259),
+                    new Cancion("11","Rolling in the Deep","Adele","Pop",2010,228),
+                    new Cancion("12","Hey Jude","The Beatles","Rock",1968,431),
+                    new Cancion("13","Bohemian Rhapsody","Queen","Rock",1975,354),
+                    new Cancion("14","Lose Yourself","Eminem","Rap",2002,326),
+                    new Cancion("15","Hallelujah","Leonard Cohen","Folk",1984,282),
+                    new Cancion("16","Creep","Radiohead","Alternative",1992,238),
+                    new Cancion("17","Viva La Vida","Coldplay","Alternative",2008,242),
+                    new Cancion("18","Back in Black","AC/DC","Rock",1980,255),
+                    new Cancion("19","All of Me","John Legend","Pop",2013,269),
+                    new Cancion("20","Bad Guy","Billie Eilish","Pop",2019,194)
             );
             for (Cancion c : demo) ctx.addSong(c);
         }
@@ -103,5 +118,12 @@ public class LoginController {
     public void onRegister(ActionEvent e) {
         Stage stage = (Stage) registerButton.getScene().getWindow();
         ViewLoader.load(stage, "register-view.fxml", "Crear cuenta");
+    }
+
+    /** Lista usuarios ordenados por ID ascendente */
+    public List<Usuario> listarUsuariosPorId() {
+        List<Usuario> lista = new ArrayList<>(AppContext.get().userRepository.list());
+        lista.sort(Comparator.comparing(Usuario::getId));
+        return lista;
     }
 }

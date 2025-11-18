@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.UUID;
 
 public class LoginController {
 
@@ -38,16 +39,26 @@ public class LoginController {
         }
 
         // ------- Semilla de usuarios solo si está vacío -------
-        /*if (ctx.userRepository.size() == 0) {
+        if (ctx.userRepository.size() == 0) {
 
-            Usuario u = new Usuario("demo", "demo", "Demo", Usuario.Role.USER);
+            Usuario u = new Usuario(
+                    UUID.randomUUID().toString(),
+                    "demo",
+                    "demo",
+                    "Usuario Demo",
+                    Usuario.Role.USER
+            );
             ctx.registerUser(u);
 
-            Usuario admin = new Usuario("admin", "admin", "Administrador", Usuario.Role.ADMIN);
+            Usuario admin = new Usuario(
+                    UUID.randomUUID().toString(),
+                    "admin",
+                    "admin",
+                    "Administrador",
+                    Usuario.Role.ADMIN
+            );
             ctx.registerUser(admin);
         }
-
-         */
     }
 
     @FXML

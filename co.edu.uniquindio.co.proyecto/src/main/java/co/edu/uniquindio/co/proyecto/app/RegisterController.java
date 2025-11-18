@@ -1,53 +1,55 @@
 package co.edu.uniquindio.co.proyecto.app;
 
 import co.edu.uniquindio.co.proyecto.model.Usuario;
+import co.edu.uniquindio.co.proyecto.repository.DataManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-
-import java.util.UUID;
 
 public class RegisterController {
 
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
-    @FXML private TextField nameField;
+    @FXML private PasswordField confirmPasswordField;
     @FXML private Label messageLabel;
 
     @FXML
-    public void onRegister() {
-        String username = usernameField.getText();
-        String pass = passwordField.getText();
-        String nombre = nameField.getText();
+    private void onRegister() {
 
-        if (username.isBlank() || pass.isBlank() || nombre.isBlank()) {
-            messageLabel.setText("Complete todos los campos");
+        String username = usernameField.getText();
+        String password = passwordField.getText();
+        String confirm = confirmPasswordField.getText();
+
+        if (username.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
+            messageLabel.setText("Todos los campos son obligatorios.");
             return;
         }
 
-        // ✔ Generar ID obligatorio para cumplir con el constructor
-        String id = java.util.UUID.randomUUID().toString();
+        if (!password.equals(confirm)) {
+            messageLabel.setText("Las contraseñas no coinciden.");
+            return;
+        }
 
-        Usuario nuevo = new Usuario(
-                UUID.randomUUID().toString(),
-                username,
-                pass,
-                nameField.getText(),
-                Usuario.Role.USER
+        Usuario user = new Usuario(
+                java.util.UUID.randomUUID().toString(), // id único
+                username,                               // username
+                password,                               // password
+                username,                               // nombre (lo tomamos igual)
+                Usuario.Role.USER                       // rol
         );
 
-        boolean ok = AppContext.get().registerUser(nuevo);
+        boolean registrado = DataManager.registerUser(user);
 
-        if (!ok) {
-            messageLabel.setText("El usuario ya existe");
+        if (!registrado) {
+            messageLabel.setText("El usuario ya existe.");
             return;
         }
 
-        messageLabel.setText("¡Registro exitoso!");
+        messageLabel.setText("Usuario registrado correctamente ✔");
     }
 
     @FXML
-    public void onGoBack() {
+    private void onGoBack() {
         Stage stage = (Stage) usernameField.getScene().getWindow();
         ViewLoader.load(stage, "login-view.fxml", "Iniciar Sesión");
     }

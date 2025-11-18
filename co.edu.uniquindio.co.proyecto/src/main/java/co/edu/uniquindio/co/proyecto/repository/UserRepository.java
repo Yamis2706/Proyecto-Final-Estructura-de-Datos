@@ -1,7 +1,6 @@
 package co.edu.uniquindio.co.proyecto.repository;
 
 import co.edu.uniquindio.co.proyecto.model.Usuario;
-import co.edu.uniquindio.co.proyecto.repository.DataManager;
 
 import java.util.*;
 

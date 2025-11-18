@@ -28,11 +28,11 @@
 
     <Label fx:id="messageLabel" textFill="red" />
 
-    <Button text="Ingresar" onAction="#onLogin"
+    <Button fx:id="loginButton" text="Ingresar" onAction="#onLogin"
             style="-fx-background-color: #8E2DE2; -fx-text-fill: white; -fx-font-weight: bold;
                        -fx-background-radius: 10; -fx-padding: 10; -fx-font-size: 14;" />
 
-    <Button text="Crear cuenta" onAction="#onRegister"
+    <Button fx:id="registerButton" text="Crear cuenta" onAction="#onRegister"
             style="-fx-background-color: transparent; -fx-text-fill: #4A00E0;
                        -fx-font-size: 13; -fx-underline: true;" />
 

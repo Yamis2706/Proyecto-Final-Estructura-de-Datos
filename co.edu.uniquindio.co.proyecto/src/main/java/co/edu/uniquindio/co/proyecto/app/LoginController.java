@@ -17,6 +17,7 @@ public class LoginController {
     @FXML private PasswordField passwordField;
     @FXML private ChoiceBox<String> roleChoice;
     @FXML private Button loginButton;
+    @FXML private Button registerButton;
     @FXML private Label messageLabel;
 
     @FXML

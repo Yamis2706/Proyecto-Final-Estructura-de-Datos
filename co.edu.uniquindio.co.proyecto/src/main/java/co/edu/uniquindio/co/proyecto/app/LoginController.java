@@ -25,7 +25,7 @@ public class LoginController {
         roleChoice.getSelectionModel().selectFirst();
         seedDemoData();
     }
-
+    //Hola
     private void seedDemoData() {
         var ctx = AppContext.get();
         List<Cancion> demo = List.of(

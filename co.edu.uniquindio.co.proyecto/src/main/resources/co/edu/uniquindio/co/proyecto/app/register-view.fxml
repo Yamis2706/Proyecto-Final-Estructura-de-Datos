@@ -29,7 +29,7 @@
         <Label fx:id="messageLabel" style="-fx-text-fill: #FCDDEC; -fx-font-size: 13px;"/>
 
         <Hyperlink fx:id="backToLogin" text="Volver al inicio"
-                   onAction="#onBackToLogin"
+                   onAction="#onGoBack"
                    style="-fx-text-fill: #D8C5FF;"/>
 
     </VBox>

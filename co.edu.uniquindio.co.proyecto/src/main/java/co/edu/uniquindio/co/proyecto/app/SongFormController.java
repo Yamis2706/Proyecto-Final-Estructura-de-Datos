@@ -29,15 +29,18 @@ public class SongFormController {
             Cancion c = new Cancion(id, titulo, artista, genero, anio, duracion);
 
             if (cancionEdicion == null) {
-                AppContext.get().songCatalog.add(c);
+                // CREAR canción nueva + persistir
+                AppContext.get().addSong(c);
             } else {
-                AppContext.get().songCatalog.update(c);
+                // EDITAR canción existente + persistir
+                AppContext.get().updateSong(c);
             }
 
             ((Stage) txtId.getScene().getWindow()).close();
 
         } catch (Exception e) {
-            new Alert(Alert.AlertType.ERROR, "Datos inválidos").show();
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Datos inválidos o ID duplicado").show();
         }
     }
 
@@ -47,12 +50,16 @@ public class SongFormController {
     }
 
     public void cargarCancion(Cancion c) {
-        cancionEdicion = c;
+        this.cancionEdicion = c;
+
         txtId.setText(c.getId());
         txtTitulo.setText(c.getTitulo());
         txtArtista.setText(c.getArtista());
         txtGenero.setText(c.getGenero());
         txtAnio.setText(String.valueOf(c.getAnio()));
         txtDuracion.setText(String.valueOf(c.getDuracionSegundos()));
+
+        // IMPORTANTE: bloquear ID para evitar inconsistencias
+        txtId.setDisable(true);
     }
 }

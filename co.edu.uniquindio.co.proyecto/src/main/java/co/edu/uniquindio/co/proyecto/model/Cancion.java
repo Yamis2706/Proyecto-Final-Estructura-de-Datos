@@ -22,6 +22,48 @@ public class Cancion {
         this.duracionSegundos = duracionSegundos;
     }
 
+    /**
+     * Calcula la similitud entre esta canción y otra.
+     * Implementa RF-017: Funcionar como nodo en el Grafo de Similitud.
+     *
+     * @param otra Canción a comparar
+     * @return Peso de similitud (menor peso = mayor similitud)
+     */
+    public double calcularSimilitud(Cancion otra) {
+        if (otra == null) return Double.POSITIVE_INFINITY;
+        if (this.equals(otra)) return 0.0; // Misma canción
+
+        double similitud = 0.0;
+
+        // Similitud por artista (peso: 40%)
+        if (this.artista != null && otra.artista != null &&
+                this.artista.equalsIgnoreCase(otra.artista)) {
+            similitud += 0.4;
+        }
+
+        // Similitud por género (peso: 30%)
+        if (this.genero != null && otra.genero != null &&
+                this.genero.equalsIgnoreCase(otra.genero)) {
+            similitud += 0.3;
+        }
+
+        // Similitud por año (peso: 20%)
+        int diferenciaAño = Math.abs(this.anio - otra.anio);
+        if (diferenciaAño <= 5) {
+            similitud += 0.2 * (1.0 - (diferenciaAño / 10.0));
+        }
+
+        // Similitud por duración (peso: 10%)
+        int diferenciaDuracion = Math.abs(this.duracionSegundos - otra.duracionSegundos);
+        if (diferenciaDuracion <= 60) { // Diferencia menor a 1 minuto
+            similitud += 0.1 * (1.0 - (diferenciaDuracion / 300.0));
+        }
+
+        // Convertir similitud a peso (menor peso = mayor similitud)
+        // Similitud 1.0 -> peso 1.0, Similitud 0.0 -> peso 10.0
+        return Math.max(1.0, 10.0 - (similitud * 9.0));
+    }
+
     public String getId() {
         return id;
     }
@@ -91,5 +133,3 @@ public class Cancion {
                 '}';
     }
 }
-
-

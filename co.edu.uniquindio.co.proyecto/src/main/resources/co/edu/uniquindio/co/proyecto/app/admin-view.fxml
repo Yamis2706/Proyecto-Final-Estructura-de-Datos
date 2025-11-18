@@ -1,65 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.geometry.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="co.edu.uniquindio.co.proyecto.app.AdminController"
-            prefWidth="900" prefHeight="640"
-            style="-fx-background-color: #F7F4FF;">
+<BorderPane prefHeight="640" prefWidth="900" style="-fx-background-color: #F7F4FF;"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="co.edu.uniquindio.co.proyecto.app.AdminController">
 
   <!-- PANEL SUPERIOR -->
   <top>
-    <HBox spacing="20" alignment="CENTER_LEFT"
-          style="-fx-background-color: #6A57A5; -fx-padding: 18;">
-      <Label text="Panel Administrador - SyncUp"
-             style="-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #2E2A62; -fx-padding: 18;">
+      <Label style="-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold;"
+             text="Panel Administrador - SyncUp 🎧" />
     </HBox>
   </top>
 
   <!-- PANEL IZQUIERDO -->
   <left>
-    <VBox spacing="18" alignment="TOP_CENTER"
-          prefWidth="240"
+    <VBox alignment="TOP_CENTER" prefWidth="240" spacing="18"
           style="-fx-background-color: #2E2A62; -fx-padding: 20;">
 
-      <Button text="➕ Registrar Canción"
-              onAction="#onRegisterSong"
+      <Button onAction="#onRegisterSong" prefWidth="200"
               style="-fx-background-radius: 12; -fx-background-color: #8E7CC3; -fx-text-fill: white;"
-              prefWidth="200"/>
+              text="➕ Registrar Canción" />
 
-      <Button text="✏ Editar Canción"
-              onAction="#onEditSong"
+      <Button onAction="#onEditSong" prefWidth="200"
               style="-fx-background-radius: 12; -fx-background-color: #8E7CC3; -fx-text-fill: white;"
-              prefWidth="200"/>
+              text="✏ Editar Canción" />
 
-      <Button text="❌ Eliminar Canción"
-              onAction="#onDeleteSong"
+      <Button onAction="#onDeleteSong" prefWidth="200"
               style="-fx-background-radius: 12; -fx-background-color: #8E7CC3; -fx-text-fill: white;"
-              prefWidth="200"/>
+              text="❌ Eliminar Canción" />
 
-      <Button text="🚪 Salir"
-              onAction="#onLogout"
+      <AnchorPane prefHeight="300" />
+
+      <Button onAction="#onListUsers" prefWidth="200"
+              style="-fx-background-radius: 12; -fx-background-color: #8E7CC3; -fx-text-fill: white;"
+              text="📋 Listar Usuarios" />
+
+      <Button onAction="#onDeleteUser" prefWidth="200"
+              style="-fx-background-radius: 12; -fx-background-color: #8E7CC3; -fx-text-fill: white;"
+              text="❌ Eliminar Usuario" />
+
+      <Button onAction="#onLogout" prefHeight="25" prefWidth="200"
               style="-fx-background-radius: 12; -fx-background-color: #B28BFF; -fx-text-fill: white;"
-              prefWidth="200"/>
+              text="🚪 Salir" />
 
     </VBox>
   </left>
 
   <!-- PANEL CENTRAL -->
   <center>
-    <VBox spacing="20" alignment="TOP_CENTER" style="-fx-padding: 20;">
+    <VBox alignment="TOP_CENTER" spacing="20" style="-fx-padding: 20;">
 
-      <TableView fx:id="songTable" prefHeight="500" prefWidth="650">
+      <!-- TABLA CANCIONES -->
+      <Label text="Canciones" textFill="#2e2a62">
+        <font><Font name="System Bold" size="13.0" /></font>
+      </Label>
+
+      <TableView fx:id="songTable" prefHeight="200" prefWidth="620">
         <columns>
-          <TableColumn fx:id="colId" text="ID" prefWidth="80"/>
-          <TableColumn fx:id="colTitulo" text="Título" prefWidth="160"/>
-          <TableColumn fx:id="colArtista" text="Artista" prefWidth="160"/>
-          <TableColumn fx:id="colGenero" text="Género" prefWidth="120"/>
-          <TableColumn fx:id="colAnio" text="Año" prefWidth="80"/>
-          <TableColumn fx:id="colDuracion" text="Duración (seg)" prefWidth="120"/>
+          <TableColumn fx:id="colId" prefWidth="80" text="ID" />
+          <TableColumn fx:id="colTitulo" prefWidth="160" text="Título" />
+          <TableColumn fx:id="colArtista" prefWidth="160" text="Artista" />
+          <TableColumn fx:id="colGenero" prefWidth="120" text="Género" />
+          <TableColumn fx:id="colAnio" prefWidth="80" text="Año" />
+          <TableColumn fx:id="colDuracion" prefWidth="120" text="Duración (seg)" />
+        </columns>
+      </TableView>
+
+      <!-- TABLA USUARIOS -->
+      <Label text="Usuarios" textFill="#2e2a62">
+        <font><Font name="System Bold" size="13.0" /></font>
+      </Label>
+
+      <TableView fx:id="userTable" prefHeight="200" prefWidth="620">
+        <columns>
+          <TableColumn fx:id="colUserId" prefWidth="200" text="ID" />
+          <TableColumn fx:id="colUserUsername" prefWidth="150" text="Usuario" />
+          <TableColumn fx:id="colUserPassword" prefWidth="150" text="Contraseña" />
+          <TableColumn fx:id="colUserRole" prefWidth="120" text="Rol" />
         </columns>
       </TableView>
 
@@ -67,4 +95,3 @@
   </center>
 
 </BorderPane>
-

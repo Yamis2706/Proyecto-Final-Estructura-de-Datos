@@ -5,32 +5,61 @@ import co.edu.uniquindio.co.proyecto.model.Cancion;
 import java.util.*;
 
 /**
- * Grafo ponderado no dirigido de canciones.
- * Provee:
- *  - conectar(a,b,peso)
- *  - vecinos(c)
- *  - obtenerCancionesSimilares(c) -> vecinos ordenados por peso asc.
- *  - calcularDistancias(origen) -> Dijkstra: mapa Cancion->distancia (costo)
- *  - dijkstra(origen,destino) -> Ruta (camino y costo)
- *
- * Nota: menor peso = mayor similitud según tu modelo.
+ * Grafo ponderado no dirigido de canciones con conexión automática por similitud.
+ * Implementa RF-019 y RF-020.
  */
 public class GrafoDeSimilitud {
 
     private final Map<Cancion, Map<Cancion, Double>> ady = new HashMap<>();
+    private final double umbralSimilitud;
 
+    /**
+     * Constructor con umbral de similitud personalizado.
+     * @param umbralSimilitud Peso máximo para considerar conexión (menor = más similar)
+     */
+    public GrafoDeSimilitud(double umbralSimilitud) {
+        this.umbralSimilitud = umbralSimilitud;
+    }
+
+    /**
+     * Constructor con umbral por defecto.
+     */
+    public GrafoDeSimilitud() {
+        this(5.0); // Umbral por defecto
+    }
+
+    /**
+     * Agrega una canción y la conecta automáticamente con canciones similares.
+     * Implementa RF-017: Canción funciona como nodo en el grafo.
+     */
     public void agregarCancion(Cancion c) {
         if (c == null) return;
         ady.computeIfAbsent(c, k -> new HashMap<>());
+
+        // Conectar automáticamente con canciones existentes si son similares
+        for (Cancion existente : ady.keySet()) {
+            if (!existente.equals(c)) {
+                double peso = c.calcularSimilitud(existente);
+                if (peso <= umbralSimilitud) {
+                    conectar(c, existente, peso);
+                }
+            }
+        }
     }
 
     public void conectar(Cancion a, Cancion b, double peso) {
         if (a == null || b == null) return;
         if (peso < 0) throw new IllegalArgumentException("Peso debe ser no negativo");
-        agregarCancion(a);
-        agregarCancion(b);
+        agregarCancionSinConectar(a);
+        agregarCancionSinConectar(b);
         ady.get(a).put(b, peso);
         ady.get(b).put(a, peso);
+    }
+
+    private void agregarCancionSinConectar(Cancion c) {
+        if (c != null) {
+            ady.computeIfAbsent(c, k -> new HashMap<>());
+        }
     }
 
     public Map<Cancion, Double> vecinos(Cancion c) {
@@ -48,7 +77,8 @@ public class GrafoDeSimilitud {
     }
 
     /**
-     * Dijkstra que devuelve mapa Cancion->distancia desde origen.
+     * Dijkstra optimizado para encontrar rutas de mayor similitud (menor costo).
+     * Implementa RF-020: Algoritmos de recorrido como Dijkstra para menor costo.
      */
     public Map<Cancion, Double> calcularDistancias(Cancion origen) {
         Map<Cancion, Double> dist = new HashMap<>();
@@ -80,7 +110,8 @@ public class GrafoDeSimilitud {
     }
 
     /**
-     * Dijkstra que devuelve una Ruta (camino y costo). Firma compatible con los tests.
+     * Dijkstra que devuelve una Ruta completa (camino y costo).
+     * Optimizado para encontrar rutas de mayor similitud (menor costo total).
      */
     public Ruta dijkstra(Cancion origen, Cancion destino) {
         if (!ady.containsKey(origen) || !ady.containsKey(destino)) {
@@ -121,6 +152,42 @@ public class GrafoDeSimilitud {
         LinkedList<Cancion> camino = new LinkedList<>();
         for (Cancion at = destino; at != null; at = prev.get(at)) camino.addFirst(at);
         return new Ruta(camino, costo);
+    }
+
+    /**
+     * Genera una radio de canciones similares a partir de una canción semilla.
+     * Utiliza el grafo de similitud para encontrar canciones relacionadas.
+     */
+    public Queue<Cancion> generarRadioMejorada(Cancion inicio, int maxSize) {
+        Queue<Cancion> cola = new ArrayDeque<>();
+        if (inicio == null || maxSize <= 0 || !ady.containsKey(inicio)) return cola;
+
+        Set<Cancion> visitado = new HashSet<>();
+        PriorityQueue<Map.Entry<Cancion, Double>> pq = new PriorityQueue<>(
+                Comparator.comparingDouble(Map.Entry::getValue)
+        );
+
+        visitado.add(inicio);
+        cola.add(inicio);
+
+        // Agregar vecinos inmediatos ordenados por similitud
+        Map<Cancion, Double> vecinos = vecinos(inicio);
+        pq.addAll(vecinos.entrySet());
+
+        while (!pq.isEmpty() && cola.size() < maxSize) {
+            Map.Entry<Cancion, Double> e = pq.poll();
+            Cancion next = e.getKey();
+            if (visitado.add(next)) {
+                cola.add(next);
+                // Agregar vecinos de segundo nivel
+                for (Map.Entry<Cancion, Double> n2 : vecinos(next).entrySet()) {
+                    if (!visitado.contains(n2.getKey())) {
+                        pq.add(n2);
+                    }
+                }
+            }
+        }
+        return cola;
     }
 
     // ---------------- Ruta ----------------

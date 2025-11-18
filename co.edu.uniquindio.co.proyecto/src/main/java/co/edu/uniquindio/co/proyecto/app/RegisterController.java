@@ -5,6 +5,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
+import java.util.UUID;
+
 public class RegisterController {
 
     @FXML private TextField usernameField;
@@ -14,26 +16,34 @@ public class RegisterController {
 
     @FXML
     public void onRegister() {
-        var ctx = AppContext.get();
-
         String username = usernameField.getText();
         String pass = passwordField.getText();
-        String name = nameField.getText();
+        String nombre = nameField.getText();
 
-        if (username.isBlank() || pass.isBlank() || name.isBlank()) {
-            messageLabel.setText("Todos los campos son obligatorios");
+        if (username.isBlank() || pass.isBlank() || nombre.isBlank()) {
+            messageLabel.setText("Complete todos los campos");
             return;
         }
 
-        if (ctx.userRepository.get(username).isPresent()) {
-            messageLabel.setText("Usuario ya existe");
+        // ✔ Generar ID obligatorio para cumplir con el constructor
+        String id = java.util.UUID.randomUUID().toString();
+
+        Usuario nuevo = new Usuario(
+                UUID.randomUUID().toString(),
+                username,
+                pass,
+                nameField.getText(),
+                Usuario.Role.USER
+        );
+
+        boolean ok = AppContext.get().registerUser(nuevo);
+
+        if (!ok) {
+            messageLabel.setText("El usuario ya existe");
             return;
         }
 
-        ctx.registerUser(new Usuario(username, pass, name, Usuario.Role.USER));
-
-        Stage stage = (Stage) usernameField.getScene().getWindow();
-        ViewLoader.load(stage, "login-view.fxml", "Iniciar Sesión");
+        messageLabel.setText("¡Registro exitoso!");
     }
 
     @FXML

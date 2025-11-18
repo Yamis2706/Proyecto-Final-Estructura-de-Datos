@@ -82,15 +82,19 @@ public class AppContext {
      * @return true si se agregó correctamente (username único).
      */
     public boolean registerUser(Usuario u) {
-        boolean ok = userRepository.add(u);
-        if (ok) {
-            // construir mapa desde el repositorio y guardarlo
-            Map<String, Usuario> map = new HashMap<>();
-            for (Usuario item : userRepository.list()) map.put(item.getUsername(), item);
-            DataManager.saveUsers(map);
+        if (userRepository.contains(u.getUsername())) {
+            return false;
         }
-        return ok;
+
+        userRepository.add(u);
+
+        userRepository.persist(); // guarda en users.txt
+
+        return true;
     }
+
+
+
 
     // ---------------- Canciones ----------------
 

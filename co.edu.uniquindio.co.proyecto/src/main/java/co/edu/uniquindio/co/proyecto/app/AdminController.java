@@ -1,138 +1,160 @@
 package co.edu.uniquindio.co.proyecto.app;
 
 import co.edu.uniquindio.co.proyecto.model.Cancion;
-import javafx.collections.FXCollections;
+import co.edu.uniquindio.co.proyecto.model.Usuario;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
-import java.io.File;
-import java.nio.file.Path;
+public class AdminController {
 
-public class            AdminController {
-    @FXML private TextField idField;
-    @FXML private TextField tituloField;
-    @FXML private TextField artistaField;
-    @FXML private TextField generoField;
-    @FXML private TextField anioField;
-    @FXML private TextField duracionField;
-    @FXML private ListView<String> catalogList;
-    @FXML private ListView<String> userList;
+    // ---------------- TABLA CANCIONES ----------------
+    @FXML private TableView<Cancion> songTable;
+    @FXML private TableColumn<Cancion, String> colId;
+    @FXML private TableColumn<Cancion, String> colTitulo;
+    @FXML private TableColumn<Cancion, String> colArtista;
+    @FXML private TableColumn<Cancion, String> colGenero;
+    @FXML private TableColumn<Cancion, Integer> colAnio;
+    @FXML private TableColumn<Cancion, Integer> colDuracion;
+
+    // ---------------- TABLA USUARIOS ----------------
+    @FXML private TableView<Usuario> songTable1;
+    @FXML private TableColumn<Usuario, String> colId1;
+    @FXML private TableColumn<Usuario, String> colTitulo1;
+    @FXML private TableColumn<Usuario, String> colArtista1;
+    @FXML private TableColumn<Usuario, String> colGenero1;
+    @FXML private TableColumn<Usuario, String> colAnio1;
+    @FXML private TableColumn<Usuario, String> colDuracion1;
 
     private final AppContext ctx = AppContext.get();
 
     @FXML
     public void initialize() {
+
+        // ---------------------- CANCIONES -------------------------
+        colId.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getId()));
+        colTitulo.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getTitulo()));
+        colArtista.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getArtista()));
+        colGenero.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getGenero()));
+        colAnio.setCellValueFactory(f -> new SimpleObjectProperty<>(f.getValue().getAnio()));
+        colDuracion.setCellValueFactory(f -> new SimpleObjectProperty<>(f.getValue().getDuracionSegundos()));
+
+        cargarTablaCanciones();
+
+        // ---------------------- USUARIOS -------------------------
+        colId1.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getUsername()));   // ID → username
+        colTitulo1.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getNombre())); // Nombre
+        colArtista1.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getRole().name())); // Rol
+        colGenero1.setCellValueFactory(f -> new SimpleStringProperty("")); // vacío
+        colAnio1.setCellValueFactory(f -> new SimpleStringProperty("")); // vacío
+        colDuracion1.setCellValueFactory(f -> new SimpleStringProperty("")); // vacío
+
+        cargarTablaUsuarios();
+    }
+
+    // =====================================================
+    // ================ CARGAR TABLAS ======================
+    // =====================================================
+
+    private void cargarTablaCanciones() {
+        songTable.getItems().setAll(ctx.songCatalog.list());
+    }
+
+    private void cargarTablaUsuarios() {
+        songTable1.getItems().setAll(ctx.userRepository.getAll());
+    }
+
+    // =====================================================
+    // ================ BOTONES CANCIONES ===================
+    // =====================================================
+
+    @FXML
+    private void onRegisterSong() {
+        abrirFormularioCancion(null);
+    }
+
+    @FXML
+    private void onEditSong() {
+        Cancion seleccionada = songTable.getSelectionModel().getSelectedItem();
+        if (seleccionada == null) {
+            new Alert(Alert.AlertType.WARNING, "Selecciona una canción primero").show();
+            return;
+        }
+        abrirFormularioCancion(seleccionada);
+    }
+
+    @FXML
+    private void onDeleteSong() {
+        Cancion seleccionada = songTable.getSelectionModel().getSelectedItem();
+        if (seleccionada == null) {
+            new Alert(Alert.AlertType.WARNING, "Selecciona una canción").show();
+            return;
+        }
+
+        ctx.deleteSong(seleccionada.getId());
+        cargarTablaCanciones();
+    }
+
+    // =====================================================
+    // ================ BOTONES USUARIOS ===================
+    // =====================================================
+
+    @FXML
+    private void onListUsers() {
+        cargarTablaUsuarios();
+    }
+
+    @FXML
+    private void onDeleteUser() {
+        Usuario u = songTable1.getSelectionModel().getSelectedItem();
+
+        if (u == null) {
+            new Alert(Alert.AlertType.WARNING, "Selecciona un usuario").show();
+            return;
+        }
+
+        ctx.userRepository.delete(u.getUsername());
+        ctx.userRepository.persist(); // 💾 guardar cambios
+
+        cargarTablaUsuarios();
+    }
+
+    // =====================================================
+    // ================ FORMULARIO CANCIONES ===============
+    // =====================================================
+
+    private void abrirFormularioCancion(Cancion c) {
         try {
-            if (catalogList != null) {
-                refrescarLista();
-            }
-            if (userList != null) {
-                refrescarUsuarios();
-            }
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("song-form.fxml"));
+            Stage modal = new Stage();
+            modal.setScene(new Scene(loader.load()));
+            modal.initModality(Modality.APPLICATION_MODAL);
+            modal.setTitle(c == null ? "Registrar Canción" : "Editar Canción");
+
+            SongFormController controller = loader.getController();
+            if (c != null) controller.cargarCancion(c);
+
+            modal.setOnHidden(e -> cargarTablaCanciones());
+            modal.show();
+
         } catch (Exception ex) {
-            new Alert(Alert.AlertType.ERROR, "Error inicializando Admin: " + ex.getMessage()).showAndWait();
+            ex.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "No se pudo abrir el formulario").show();
         }
     }
+
+    // =====================================================
+    // ================ LOGOUT =============================
+    // =====================================================
 
     @FXML
-    public void onAgregar() {
-        try {
-            Cancion c = new Cancion(
-                    idField.getText(),
-                    tituloField.getText(),
-                    artistaField.getText(),
-                    generoField.getText(),
-                    Integer.parseInt(anioField.getText().trim()),
-                    Integer.parseInt(duracionField.getText().trim())
-            );
-            if (ctx.songCatalog.add(c)) {
-                if (c.getTitulo() != null) ctx.trie.insertar(c.getTitulo());
-                refrescarLista();
-                limpiarCampos();
-            } else {
-                showError("ID existente");
-            }
-        } catch (Exception ex) {
-            showError("Datos inválidos");
-        }
-    }
-
-    @FXML
-    public void onActualizar() {
-        try {
-            Cancion c = new Cancion(
-                    idField.getText(),
-                    tituloField.getText(),
-                    artistaField.getText(),
-                    generoField.getText(),
-                    Integer.parseInt(anioField.getText().trim()),
-                    Integer.parseInt(duracionField.getText().trim())
-            );
-            if (ctx.songCatalog.update(c)) {
-                refrescarLista();
-                limpiarCampos();
-            } else {
-                showError("ID no existe");
-            }
-        } catch (Exception ex) {
-            showError("Datos inválidos");
-        }
-    }
-
-    @FXML
-    public void onEliminar() {
-        String id = idField.getText();
-        if (id == null || id.isBlank()) { showError("Ingrese ID"); return; }
-        if (ctx.songCatalog.remove(id)) {
-            refrescarLista();
-            limpiarCampos();
-        } else {
-            showError("ID no existe");
-        }
-    }
-
-    private void refrescarLista() {
-        catalogList.setItems(FXCollections.observableArrayList(ctx.songCatalog.list().stream().map(c -> c.getId()+" - "+c.getTitulo()).toList()));
-    }
-
-    private void refrescarUsuarios() {
-        userList.setItems(FXCollections.observableArrayList(ctx.userRepository.list().stream().map(u -> u.getUsername()+" ("+u.getRole()+")").toList()));
-    }
-
-    private void limpiarCampos() {
-        idField.clear(); tituloField.clear(); artistaField.clear(); generoField.clear(); anioField.clear(); duracionField.clear();
-    }
-
-    private void showError(String msg) {
-        new Alert(Alert.AlertType.ERROR, msg).showAndWait();
-    }
-
-    @FXML
-    public void onBulkLoad() {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Cargar canciones (texto plano)");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Texto/CSV", "*.txt", "*.csv"));
-        File f = chooser.showOpenDialog(catalogList.getScene().getWindow());
-        if (f == null) return;
-        try {
-            var result = ctx.bulkImportService.importSongs(Path.of(f.getAbsolutePath()), ctx.songCatalog);
-            ctx.indexTitles(ctx.songCatalog.list());
-            refrescarLista();
-            new Alert(Alert.AlertType.INFORMATION, "Insertadas: "+result.inserted+". Errores: "+result.errors.size()).showAndWait();
-        } catch (Exception ex) {
-            showError("Error importando: "+ex.getMessage());
-        }
-    }
-
-    @FXML
-    public void onDeleteSelectedUser() {
-        String selected = userList.getSelectionModel().getSelectedItem();
-        if (selected == null) return;
-        String username = selected.split(" ", 2)[0];
-        if (ctx.userRepository.remove(username)) {
-            try { ctx.authService.save(); } catch (Exception ignored) {}
-            refrescarUsuarios();
-        }
+    private void onLogout() {
+        Stage stage = (Stage) songTable.getScene().getWindow();
+        ViewLoader.load(stage, "login-view.fxml", "Login");
     }
 }
